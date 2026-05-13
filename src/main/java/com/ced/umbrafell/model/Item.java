@@ -9,6 +9,7 @@ package com.ced.umbrafell.model;
  * @author aluno
  */
 public class Item {
+    
     private int id;
     private String nome;
     private String tipo;

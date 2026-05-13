@@ -8,7 +8,7 @@ package com.ced.umbrafell.model;
  *
  * @author aluno
  */
-public class Boss extends Enemy {
+public class BossEnemy extends Enemy {
     // dano = danoVampiro * 2
     // equivalente a n * 2.40
 }
