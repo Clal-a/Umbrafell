@@ -2,13 +2,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.ced.umbrafell.model;
+package com.ced.umbrafell.controller;
 
 /**
  *
  * @author aluno
  */
-public class BossEnemy extends Enemy {
-    // dano = danoVampiro * 2
-    // equivalente a n * 2.40
+public class VampiroController {
+    
 }
