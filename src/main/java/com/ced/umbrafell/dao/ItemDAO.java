@@ -8,6 +8,6 @@ package com.ced.umbrafell.dao;
  *
  * @author aluno
  */
-public class Item {
+public class ItemDAO {
     
 }

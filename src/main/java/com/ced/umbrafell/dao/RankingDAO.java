@@ -8,6 +8,6 @@ package com.ced.umbrafell.dao;
  *
  * @author aluno
  */
-public class Upgrade {
+public class RankingDAO {
     
 }

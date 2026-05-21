@@ -5,25 +5,36 @@ package com.ced.umbrafell.model;
  * @authors Cesar & Danilo
  */
 public class Player {
-    
+
     private int id;
     private String nome;
 
     private int vidaMaxima;
     private int vidaAtual;
+
     private int dano;
     private int defesa;
     private double velocidade;
-    private double sorte;
+
+    private int ataquePrincipalNivel;
+    private int ataqueSecundarioNivel;
 
     private int joiasSombrias;
     private int faseAtual;
-    private int pontosUpgrade;
 
-    private boolean possuiChaveCastelo;
-    private boolean bossDesbloqueado;
+    public Player() {
+        this.vidaMaxima = 100;
+        this.vidaAtual = 100;
+        this.dano = 10;
+        this.defesa = 0;
+        this.velocidade = 1.00;
+        this.ataquePrincipalNivel = 1;
+        this.ataqueSecundarioNivel = 1;
+        this.joiasSombrias = 0;
+        this.faseAtual = 1;
+    }
 
-    public Player(int id, String nome, int vidaMaxima, int vidaAtual, int dano, int defesa, double velocidade, double sorte, int joiasSombrias, int faseAtual, int pontosUpgrade, boolean possuiChaveCastelo, boolean bossDesbloqueado) {
+    public Player(int id, String nome, int vidaMaxima, int vidaAtual, int dano, int defesa, double velocidade, int ataquePrincipalNivel, int ataqueSecundarioNivel, int joiasSombrias, int faseAtual ) {
         this.id = id;
         this.nome = nome;
         this.vidaMaxima = vidaMaxima;
@@ -31,12 +42,15 @@ public class Player {
         this.dano = dano;
         this.defesa = defesa;
         this.velocidade = velocidade;
-        this.sorte = sorte;
+        this.ataquePrincipalNivel = ataquePrincipalNivel;
+        this.ataqueSecundarioNivel = ataqueSecundarioNivel;
         this.joiasSombrias = joiasSombrias;
         this.faseAtual = faseAtual;
-        this.pontosUpgrade = pontosUpgrade;
-        this.possuiChaveCastelo = possuiChaveCastelo;
-        this.bossDesbloqueado = bossDesbloqueado;
+    }
+
+    public Player(String nome) {
+        this();
+        this.nome = nome;
     }
 
     public int getId() {
@@ -55,6 +69,7 @@ public class Player {
         this.nome = nome;
     }
 
+
     public int getVidaMaxima() {
         return vidaMaxima;
     }
@@ -70,6 +85,7 @@ public class Player {
     public void setVidaAtual(int vidaAtual) {
         this.vidaAtual = vidaAtual;
     }
+
 
     public int getDano() {
         return dano;
@@ -95,13 +111,23 @@ public class Player {
         this.velocidade = velocidade;
     }
 
-    public double getSorte() {
-        return sorte;
+
+    public int getAtaquePrincipalNivel() {
+        return ataquePrincipalNivel;
     }
 
-    public void setSorte(double sorte) {
-        this.sorte = sorte;
+    public void setAtaquePrincipalNivel(int ataquePrincipalNivel) {
+        this.ataquePrincipalNivel = ataquePrincipalNivel;
     }
+
+    public int getAtaqueSecundarioNivel() {
+        return ataqueSecundarioNivel;
+    }
+
+    public void setAtaqueSecundarioNivel(int ataqueSecundarioNivel) {
+        this.ataqueSecundarioNivel = ataqueSecundarioNivel;
+    }
+
 
     public int getJoiasSombrias() {
         return joiasSombrias;
@@ -118,31 +144,4 @@ public class Player {
     public void setFaseAtual(int faseAtual) {
         this.faseAtual = faseAtual;
     }
-
-    public int getPontosUpgrade() {
-        return pontosUpgrade;
-    }
-
-    public void setPontosUpgrade(int pontosUpgrade) {
-        this.pontosUpgrade = pontosUpgrade;
-    }
-
-    public boolean isPossuiChaveCastelo() {
-        return possuiChaveCastelo;
-    }
-
-    public void setPossuiChaveCastelo(boolean possuiChaveCastelo) {
-        this.possuiChaveCastelo = possuiChaveCastelo;
-    }
-
-    public boolean isBossDesbloqueado() {
-        return bossDesbloqueado;
-    }
-
-    public void setBossDesbloqueado(boolean bossDesbloqueado) {
-        this.bossDesbloqueado = bossDesbloqueado;
-    }
-    
-    
-    
 }

@@ -1,13 +1,24 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.ced.umbrafell.dao;
 
-/**
- *
- * @author aluno
- */
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 public class ConnectionFactory {
-    
+
+    private static final String URL = "jdbc:postgresql://localhost:5432/umbrafell";
+    private static final String USUARIO = "postgres";
+    private static final String SENHA = "posgresql";
+
+    private ConnectionFactory() {
+        // Impede que a classe seja instanciada
+    }
+
+    public static Connection getConnection() throws SQLException {
+        try {
+            return DriverManager.getConnection(URL, USUARIO, SENHA);
+        } catch (SQLException e) {
+            throw new SQLException("Erro ao conectar ao banco de dados Umbrafell: " + e.getMessage(), e);
+        }
+    }
 }

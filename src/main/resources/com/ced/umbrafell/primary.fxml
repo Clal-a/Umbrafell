@@ -6,11 +6,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.shape.Rectangle?>
 
-<Pane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171" fx:controller="com.mycompany.jogo.PrimaryController" style="-fx-background-color: green;">
+<Pane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171" fx:controller="com.ced.umbrafell.controller.GameplayController" style="-fx-background-color: green;">
    <children>
-      <Rectangle fx:id="box" stroke="black" strokeWidth="3"/>
-      <Rectangle fx:id="box2" stroke="black" strokeWidth="3"/>   
-      <Rectangle fx:id="box3" stroke="black" strokeWidth="3"/>    
+      <Rectangle fx:id="player" stroke="black" strokeWidth="3" translateX="100" translateY="100"/>
+<Rectangle fx:id="dragao" stroke="black" strokeWidth="3" translateX="350" translateY="200"/>
+<Rectangle fx:id="morcego" stroke="black" strokeWidth="3" translateX="500" translateY="300"/>
    </children>
    <padding>
       <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />

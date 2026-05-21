@@ -5,5 +5,7 @@ module com.ced.umbrafell {
     requires org.postgresql.jdbc;
 
     opens com.ced.umbrafell to javafx.fxml;
+    opens com.ced.umbrafell.controller to javafx.fxml;
+     
     exports com.ced.umbrafell;
 }

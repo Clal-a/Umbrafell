@@ -29,19 +29,19 @@ public class DragaoController {
         this.dragao = dragao;
 
         upImg = new Image(getClass()
-                .getResource("/com/mycompany/jogo/enemy.png")
-                .toExternalForm());
+         .getResource("/com/ced/umbrafell/enemy.png")
+         .toExternalForm());
 
         downImg = new Image(getClass()
-                .getResource("/com/mycompany/jogo/enemy.png")
+                .getResource("/com/ced/umbrafell/enemy.png")
                 .toExternalForm());
 
         leftImg = new Image(getClass()
-                .getResource("/com/mycompany/jogo/enemyl.png")
+                .getResource("/com/ced/umbrafell/enemyl.png")
                 .toExternalForm());
 
         rightImg = new Image(getClass()
-                .getResource("/com/mycompany/jogo/enemyr.png")
+                .getResource("/com/ced/umbrafell/enemyr.png")
                 .toExternalForm());
 
         dragao.setFill(new ImagePattern(downImg));
