@@ -5,7 +5,10 @@ package com.ced.umbrafell.model;
  * @authors Cesar & Danilo
  */
 public class Talisman extends Item {
-    
+
+    private int idTalisma;
+    private int idItem;
+
     private String atributoBuff1;
     private double valorBuff1;
 
@@ -15,8 +18,26 @@ public class Talisman extends Item {
     private String atributoDebuff;
     private double valorDebuff;
 
-    public Talisman(String atributoBuff1, double valorBuff1, String atributoBuff2, double valorBuff2, String atributoDebuff, double valorDebuff, int id, String nome, String tipo, String descricao, int valorEmJoiasSombrias) {
-        super(id, nome, tipo, descricao, valorEmJoiasSombrias);
+    public Talisman() {
+    }
+
+    public Talisman(
+            int idTalisma,
+            int idItem,
+            String nome,
+            String tipo,
+            String descricao,
+            int valorJoiasSombrias,
+            String atributoBuff1,
+            double valorBuff1,
+            String atributoBuff2,
+            double valorBuff2,
+            String atributoDebuff,
+            double valorDebuff
+    ) {
+        super(idItem, nome, tipo, descricao, valorJoiasSombrias);
+        this.idTalisma = idTalisma;
+        this.idItem = idItem;
         this.atributoBuff1 = atributoBuff1;
         this.valorBuff1 = valorBuff1;
         this.atributoBuff2 = atributoBuff2;
@@ -24,7 +45,24 @@ public class Talisman extends Item {
         this.atributoDebuff = atributoDebuff;
         this.valorDebuff = valorDebuff;
     }
-    
+
+    public int getIdTalisma() {
+        return idTalisma;
+    }
+
+    public void setIdTalisma(int idTalisma) {
+        this.idTalisma = idTalisma;
+    }
+
+    public int getIdItem() {
+        return idItem;
+    }
+
+    public void setIdItem(int idItem) {
+        this.idItem = idItem;
+        setId(idItem);
+    }
+
     public String getAtributoBuff1() {
         return atributoBuff1;
     }
@@ -72,6 +110,4 @@ public class Talisman extends Item {
     public void setValorDebuff(double valorDebuff) {
         this.valorDebuff = valorDebuff;
     }
-    
-    
 }
