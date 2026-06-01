@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.shape.Rectangle?>
+
+<Pane fx:id="rootPane"
+      xmlns:fx="http://javafx.com/fxml/1"
+      xmlns="http://javafx.com/javafx/8.0.171"
+      fx:controller="com.ced.umbrafell.controller.GameplayController">
+
+   <children>
+
+      <ImageView fx:id="background1"
+                 fitWidth="640"
+                 fitHeight="480"
+                 preserveRatio="false">
+         <image>
+            <Image url="@background1.png" />
+         </image>
+      </ImageView>
+
+      <Rectangle fx:id="jogador"
+                 stroke="black"
+                 strokeWidth="3"
+                 translateX="700"
+                 translateY="600" />
+
+      <Rectangle fx:id="dragao"
+                 stroke="black"
+                 strokeWidth="3"
+                 translateX="350"
+                 translateY="200"/>
+
+      <Rectangle fx:id="morcego"
+                 stroke="black"
+                 strokeWidth="3"
+                 translateX="500"
+                 translateY="300"/>
+      
+      <Rectangle fx:id="ponteHitbox"
+           x="0"
+           y="720"
+           width="1600"
+           height="20"
+           opacity="0.2" />
+
+   </children>
+
+   <padding>
+      <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+   </padding>
+
+</Pane>
