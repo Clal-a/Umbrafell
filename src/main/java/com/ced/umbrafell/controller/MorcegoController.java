@@ -17,7 +17,7 @@ public class MorcegoController {
     
     private Image upImg;
     
-    private double speed = 50;
+    private double speed = 250;
     
     public MorcegoController(Rectangle morcego){
         
