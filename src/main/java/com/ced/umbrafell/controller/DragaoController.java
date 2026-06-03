@@ -20,7 +20,7 @@ public class DragaoController {
     private double shootTimer = 0;
     private List<Projectile> projectiles = new ArrayList<>();
     
-    private double speed = 150;
+    private double speed = 0;
     
     public DragaoController(Rectangle dragao){
         
@@ -147,9 +147,7 @@ public class DragaoController {
         this.speed = speed;
     }
     
-//</editor-fold>    
-
-     
+//</editor-fold> 
 }      
 
 

@@ -65,6 +65,8 @@ public class GameplayController {
 
         playerModel = new Player("Aldric");
         inventarioRun = new InventarioRun();
+        
+        adicionarItensDeTesteNoInventario();
 
         player = new PlayerController(jogador);
 
@@ -191,7 +193,7 @@ public class GameplayController {
     }
 
     private void moverMundo(double scrollMundo) {
-        dragao.setTranslateX(dragao.getTranslateX() - scrollMundo);
+        // dragao.setTranslateX(dragao.getTranslateX() - scrollMundo);
         morcego.setTranslateX(morcego.getTranslateX() - scrollMundo);
     }
 
