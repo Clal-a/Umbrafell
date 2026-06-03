@@ -60,17 +60,16 @@ public class GameplayController {
     private Rectangle ponteHitbox;
 
     public void startGame(Scene scene) {
-        
+
         input = new InputController(scene);
 
+        playerModel = new Player("Aldric");
         inventarioRun = new InventarioRun();
 
         player = new PlayerController(jogador);
 
-        Pane pane = (Pane) jogador.getParent();
-
-        pane.getChildren().add(player.getPersonImg());
-        pane.getChildren().add(player.getWeaponRect());
+        ((Pane) jogador.getParent()).getChildren().add(player.getPersonImg());
+        ((Pane) jogador.getParent()).getChildren().add(player.getWeaponRect());
 
         player.getWeaponRect().setStroke(Color.BLACK);
         player.getWeaponRect().setStrokeWidth(3);
@@ -107,6 +106,7 @@ public class GameplayController {
                 }
 
                 if (input.bClicked && !inventarioAberto) {
+                    System.out.println("b cic");
                     input.bClicked = false;
                     solicitarAbrirInventario();
                     return;
