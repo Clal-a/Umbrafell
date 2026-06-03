@@ -37,7 +37,7 @@ public class PlayerController {
 
     private double speed = 300;
     
-    private double limiteChao = 480;
+    private double limiteChao = 900;
     
     public PlayerController(Rectangle player) {
 
@@ -95,8 +95,8 @@ public class PlayerController {
         personImg.setTranslateX(player.getTranslateX() + (player.getWidth() / 2) - (personImg.getFitWidth() / 2));
         personImg.setTranslateY(player.getTranslateY() + player.getHeight() - personImg.getFitHeight());
         
-        if (player.getTranslateY() >= limiteChao - player.getHeight()) {
-            player.setTranslateY(limiteChao - player.getHeight());
+        if (player.getTranslateY() >= 900 - player.getHeight()) {
+            player.setTranslateY(900 - player.getHeight());
             speedY = 0;
             onGround = true;
         }

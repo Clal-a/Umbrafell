@@ -9,7 +9,8 @@
 <Pane fx:id="rootPane"
       xmlns:fx="http://javafx.com/fxml/1"
       xmlns="http://javafx.com/javafx/8.0.171"
-      fx:controller="com.ced.umbrafell.controller.GameplayController">
+      fx:controller="com.ced.umbrafell.controller.GameplayController"
+      style="-fx-background-image: url('com/ced/umbrafell/Background1.png'); -fx-background-repeat: no-repeat; -fx-background-size: 1920 1024">
 
    <children>
 

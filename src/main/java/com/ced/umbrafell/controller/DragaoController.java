@@ -1,6 +1,5 @@
 package com.ced.umbrafell.controller;
 
-import com.ced.umbrafell.model.Projectile;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.image.Image;
@@ -18,10 +17,10 @@ public class DragaoController {
     private Image rightImg;
     
     private double shootCooldown = 3; // intervalo em segundos
-    private double shootTimer = 1;
+    private double shootTimer = 0;
     private List<Projectile> projectiles = new ArrayList<>();
     
-    private double speed = 0;
+    private double speed = 150;
     
     public DragaoController(Rectangle dragao){
         
@@ -116,7 +115,7 @@ public class DragaoController {
         }
         
         // encontrou o player
-        if (distance < 100) {           
+        if (distance < 1000) {           
             System.out.println("PLAYER ENCONTRADO!");
             
             shootTimer -= delta;

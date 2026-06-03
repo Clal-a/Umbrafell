@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.ced.umbrafell.controller;
 
 import javafx.scene.image.Image;
@@ -10,24 +6,28 @@ import javafx.scene.shape.Rectangle;
 
 /**
  *
- * @author Henrique
+ * @authors Cesar & Danilo
  */
 public class Projectile {
-    private Rectangle projectile;
     
+    
+    
+    private Rectangle projectile;
     private Image projectiler = new Image(getClass()
-                .getResource("/com/ced/umbrafell/enemy.png")
+                .getResource("/com/ced/umbrafell/firer-1.png")
                 .toExternalForm());
     
     private Image projectilel = new Image(getClass()
-                .getResource("/com/ced/umbrafell/enemy.png")
+                .getResource("/com/ced/umbrafell/firel-1.png")
                 .toExternalForm());
     
     private double dx, dy;
-    private double speed = 50;
+    private double speed = 350;
 
     public Projectile(double startX, double startY, double dx, double dy) {
-        projectile = new Rectangle(100, 100);       
+        projectile = new Rectangle(100, 100);
+        
+        projectile.setFill(new ImagePattern(projectiler));
         
         projectile.setTranslateX(startX);
         projectile.setTranslateY(startY);
@@ -42,12 +42,12 @@ public class Projectile {
         } else {
             projectile.setFill(new ImagePattern(projectilel));
         }
+        
     }
 
     public void update(double delta) {
         projectile.setTranslateX(projectile.getTranslateX() + dx * speed * delta);
         projectile.setTranslateY(projectile.getTranslateY() + dy * speed * delta);
-        
     }
 
     public Rectangle getRect() {

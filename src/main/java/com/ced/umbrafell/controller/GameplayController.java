@@ -63,6 +63,9 @@ public class GameplayController {
         
         input = new InputController(scene);
 
+        playerModel = new Player("Aldric");
+
+        
         inventarioRun = new InventarioRun();
 
         player = new PlayerController(jogador);
@@ -105,9 +108,11 @@ public class GameplayController {
                     sword.startAttackl(player.isFacingLeft());
                     input.spaceClicked = false;
                 }
-
-                if (input.bClicked && !inventarioAberto) {
-                    input.bClicked = false;
+                
+                if (input.b && !inventarioAberto) {
+                    System.out.println("AAAAAAAAAAAAAA");
+                    input.b = false;
+                    adicionarItensDeTesteNoInventario();
                     solicitarAbrirInventario();
                     return;
                 }
