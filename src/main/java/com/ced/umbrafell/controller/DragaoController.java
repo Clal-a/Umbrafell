@@ -129,6 +129,12 @@ public class DragaoController {
         }
         
     }
+    
+    public void moverProjetisNoMundo(double scrollMundo) {
+        for (Projectile p : projectiles) {
+            p.getRect().setTranslateX(p.getRect().getTranslateX() - scrollMundo);
+        }
+    }
 
     //<editor-fold defaultstate="collapsed" desc="getters e setters">
     public Rectangle getDragao() {
