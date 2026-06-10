@@ -19,6 +19,25 @@ import javafx.stage.Stage;
 
 public class GameplayController {
 
+    private boolean pausado = false;
+    /*
+    @Override
+    public void handle(long now) {
+
+        if (pausado) {
+            return;
+        }
+
+        // lógica do jogo
+    }
+
+    Ao abrir:
+
+    pausado = true;
+    onAbrirInventario();
+    pausado = false;
+    */
+    
     static final double LARGURA = 640;
     static final double ALTURA = 400;
 
@@ -39,6 +58,9 @@ public class GameplayController {
 
     @FXML
     private Rectangle morcego;
+    
+    @FXML
+    private Rectangle vampiro;
 
     private ImageView background2;
 
@@ -51,6 +73,7 @@ public class GameplayController {
     private InputController input;
     private DragaoController enemy1;
     private MorcegoController enemy2;
+    private VampiroController enemy3;
     private Weapon sword;
 
     private Player playerModel;
@@ -80,6 +103,7 @@ public class GameplayController {
 
         enemy1 = new DragaoController(dragao);
         enemy2 = new MorcegoController(morcego);
+        enemy3 = new VampiroController(vampiro);
 
         sword = new Weapon(player.getWeaponRect(), "atack", 10, 100, 100);
 
@@ -91,12 +115,18 @@ public class GameplayController {
 
             @Override
             public void handle(long now) {
+                
+                if (pausado) {
+                    return;
+                }
+                
                 if (lastTime == 0) {
                     lastTime = now;
                     return;
                 }
 
-                double delta = (now - lastTime) / 1_000_000_000.0;
+                double delta = (now - lastTime) / 1_000_000_000.0;             
+                
                 lastTime = now;
 
                 player.setLimiteChao(ponteHitbox.getY());
@@ -119,11 +149,14 @@ public class GameplayController {
 
                 sword.update(delta, dragao);
                 sword.update(delta, morcego);
+                sword.update(delta, vampiro);
 
                 enemy1.update(delta, jogador);
                 enemy1.updateProjectiles(delta);
 
                 enemy2.update(delta, jogador);
+                
+                enemy3.update(delta, jogador);
             }
         };
 
@@ -198,6 +231,7 @@ public class GameplayController {
     private void moverMundo(double scrollMundo) {
         dragao.setTranslateX(dragao.getTranslateX() - scrollMundo);
         morcego.setTranslateX(morcego.getTranslateX() - scrollMundo);
+        vampiro.setTranslateX(vampiro.getTranslateX() - scrollMundo);
     }
 
     private void atualizarBackgroundPorScroll(double scrollMundo) {
@@ -262,7 +296,9 @@ public class GameplayController {
         }
 
         Platform.runLater(() -> {
+            pausado = true;
             onAbrirInventario();
+            pausado = false;
 
             inventarioAberto = false;
 

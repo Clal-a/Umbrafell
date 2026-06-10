@@ -16,14 +16,19 @@ public class DragaoController {
     private Image leftImg;
     private Image rightImg;
     
-    private double shootCooldown = 3; // intervalo em segundos
+    private double shootCooldown = 4; // intervalo em segundos
     private double shootTimer = 0;
     private List<Projectile> projectiles = new ArrayList<>();
     
-    private double speed = 150;
+    private double speed = 0; // Mantido em 0 pois o dragão é estático
+
+    // --- VARIÁVEIS PARA A ANIMAÇÃO DE VIGÍLIA ---
+    private double animationTimer = 0;
+    private double frameDuration = 0.5; // Tempo (em segundos) que ele passa olhando para cada lado
+    private int animState = 0; // 0 = Centro, 1 = Direita, 2 = Centro, 3 = Esquerda
+    // --------------------------------------------
     
     public DragaoController(Rectangle dragao){
-        
         this.dragao = dragao;
         
         upImg = new Image(getClass()
@@ -54,7 +59,6 @@ public class DragaoController {
         Projectile p = new Projectile(dragao.getTranslateX(), dragao.getTranslateY(), dx, dy);
         projectiles.add(p);
 
-        // adiciona na cena
         if (dragao.getParent() != null) {
             ((Pane) dragao.getParent()).getChildren().add(p.getRect());
         }
@@ -80,54 +84,63 @@ public class DragaoController {
 
         double distance = Math.sqrt(dx * dx + dy * dy);
         
-        if (distance > 0) {
+        // Removemo o bloco 'if (distance > 0)' que alterava o TranslateX/Y para ele ficar parado.
 
-            // normaliza
-            dx = dx / distance;
-            dy = dy / distance;
-
-            // movimenta
-            dragao.setTranslateX(
-                    dragao.getTranslateX() + dx * speed * delta
-            );
-
-            dragao.setTranslateY(
-                    dragao.getTranslateY() + dy * speed * delta
-            );
-        }
-
-        // sprite
-        if (Math.abs(dx) > Math.abs(dy)) {
-
-            if (dx > 0) {
-                dragao.setFill(new ImagePattern(rightImg));
+        // --- SISTEMA DE COMPORTAMENTO ---
+        if (distance < 600) { // Raio de alcance reduzido para 600px (ajuste como preferir)
+            
+            // 1. OLHAR PARA O PLAYER ENQUANTO ATACA
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 0) {
+                    dragao.setFill(new ImagePattern(rightImg));
+                } else {
+                    dragao.setFill(new ImagePattern(leftImg));
+                }
             } else {
-                dragao.setFill(new ImagePattern(leftImg));
+                if (dy > 0) {
+                    dragao.setFill(new ImagePattern(downImg));
+                } else {
+                    dragao.setFill(new ImagePattern(upImg));
+                }
+            }
+            
+            // 2. DISPARAR FOGO
+            shootTimer -= delta;
+            if (shootTimer <= 0) {
+                shoot(player); 
+                shootTimer = shootCooldown; 
             }
 
         } else {
-
-            if (dy > 0) {
-                dragao.setFill(new ImagePattern(downImg));
-            } else {
-                dragao.setFill(new ImagePattern(upImg));
+            // O Player está longe: O dragão executa a animação de vigília pelos lados
+            animationTimer += delta;
+            
+            if (animationTimer >= frameDuration) {
+                animationTimer = 0;
+                animState = (animState + 1) % 4; // Cicla entre os estados 0, 1, 2, 3
+            }
+            
+            // Aplica o sprite correspondente ao passo da patrulha visual
+            switch (animState) {
+                case 0: // Centro/Baixo
+                    dragao.setFill(new ImagePattern(downImg));
+                    break;
+                case 1: // Olhando para a Direita
+                    dragao.setFill(new ImagePattern(rightImg));
+                    break;
+                case 2: // Centro/Baixo de novo antes de ir para o outro lado
+                    dragao.setFill(new ImagePattern(downImg));
+                    break;
+                case 3: // Olhando para a Esquerda
+                    dragao.setFill(new ImagePattern(leftImg));
+                    break;
+            }
+            
+            // Garante que o timer de tiro esteja pronto quando o jogador entrar na área
+            if (shootTimer > 0) {
+                shootTimer -= delta;
             }
         }
-        
-        // encontrou o player
-        if (distance < 1000) {           
-            System.out.println("PLAYER ENCONTRADO!");
-            
-            shootTimer -= delta;
-            
-            if (shootTimer <= 0) {
-                shoot(player); // dispara
-                shootTimer = shootCooldown; // reinicia o timer
-            }
-
-
-        }
-        
     }
 
     //<editor-fold defaultstate="collapsed" desc="getters e setters">
@@ -135,7 +148,7 @@ public class DragaoController {
         return dragao;
     }
     
-    public void setDragao(Rectangle enemy1) {
+    public void setDragao(Rectangle dragao) {
         this.dragao = dragao;
     }
     
@@ -146,12 +159,8 @@ public class DragaoController {
     public void setSpeed(double speed) {
         this.speed = speed;
     }
-    
-//</editor-fold>    
-
-     
-}      
-
+    //</editor-fold>     
+}
 
     
 
