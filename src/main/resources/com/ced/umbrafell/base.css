@@ -1,0 +1,167 @@
+.base-root {
+    -fx-background-color: linear-gradient(to bottom, #0b0710, #140a18, #0a0610);
+    -fx-padding: 24;
+}
+
+.titulo-base {
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f1d6a7;
+    -fx-effect: dropshadow(gaussian, rgba(180,40,60,0.55), 14, 0.4, 0, 0);
+}
+
+.subtitulo-base {
+    -fx-font-size: 16px;
+    -fx-text-fill: #bca6b4;
+}
+
+.info-topo {
+    -fx-font-size: 14px;
+    -fx-text-fill: #d8cbd2;
+}
+
+.info-topo-destaque {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f0c46a;
+}
+
+.tab-pane-gotico {
+    -fx-background-color: transparent;
+}
+
+.tab-pane-gotico .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane-gotico .tab {
+    -fx-background-color: #1c1324;
+    -fx-border-color: #5b2033;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 20 8 20;
+}
+
+.tab-pane-gotico .tab:selected {
+    -fx-background-color: #341220;
+    -fx-border-color: #b33a52;
+}
+
+.tab-pane-gotico .tab-label {
+    -fx-text-fill: #f1d6a7;
+    -fx-font-weight: bold;
+}
+
+.conteudo-aba {
+    -fx-padding: 22;
+}
+
+.painel-detalhe {
+    -fx-background-color: rgba(26, 15, 32, 0.85);
+    -fx-border-color: #6d2740;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 18;
+    -fx-max-width: 760;
+}
+
+.detalhe-titulo {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f1d6a7;
+}
+
+.detalhe-texto {
+    -fx-font-size: 14px;
+    -fx-text-fill: #d7ccd3;
+}
+
+.botao-destaque {
+    -fx-background-color: linear-gradient(to bottom, #7a1f36, #531426);
+    -fx-text-fill: #f6e7c5;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-border-color: #d39a55;
+    -fx-border-radius: 8;
+    -fx-padding: 10 24 10 24;
+}
+
+.botao-principal {
+    -fx-background-color: linear-gradient(to bottom, #a44a18, #7a2d0e);
+    -fx-text-fill: #fff2cf;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 10;
+    -fx-border-color: #f0b45d;
+    -fx-border-radius: 10;
+    -fx-padding: 12 28 12 28;
+}
+
+.mensagem-base {
+    -fx-text-fill: #cdb7c3;
+    -fx-font-size: 13px;
+}
+
+.card-base {
+    -fx-background-color: #15101d;
+    -fx-border-color: #3a2945;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-padding: 14;
+    -fx-pref-width: 220;
+    -fx-pref-height: 175;
+}
+
+.card-base:hover {
+    -fx-border-color: #c9934b;
+    -fx-effect: dropshadow(gaussian, rgba(201,147,75,0.25), 12, 0.3, 0, 0);
+}
+
+.card-base-selecionado {
+    -fx-background-color: #24121c;
+    -fx-border-color: #f0b45d;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, rgba(200,80,80,0.35), 16, 0.4, 0, 0);
+}
+
+.card-bloqueado {
+    -fx-opacity: 0.62;
+}
+
+.card-titulo {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f1d6a7;
+}
+
+.card-subtitulo {
+    -fx-font-size: 13px;
+    -fx-text-fill: #c9934b;
+}
+
+.card-texto {
+    -fx-font-size: 12px;
+    -fx-text-fill: #d8cbd2;
+}
+
+.card-custo {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f0c46a;
+}
+
+.card-adquirido {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #7fd38a;
+}
+
+.card-debuff {
+    -fx-font-size: 12px;
+    -fx-text-fill: #d16969;
+}
+
+.card-descricao {
+    -fx-font-size: 11px;
+    -fx-text-fill: #9f929a;
+}

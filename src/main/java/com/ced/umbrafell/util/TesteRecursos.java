@@ -23,6 +23,13 @@ public class TesteRecursos {
 
         testar("/com/ced/umbrafell/inventario.fxml");
         testar("/com/ced/umbrafell/resultado.fxml");
+        
+        testar("/com/ced/umbrafell/menu.fxml");
+        testar("/com/ced/umbrafell/ranking.fxml");
+        testar("/com/ced/umbrafell/creditos.fxml");
+        testar("/com/ced/umbrafell/base.fxml");
+        testar("/com/ced/umbrafell/umbrafell.css");
+        
     }
 
     private static void testar(String caminho) {
