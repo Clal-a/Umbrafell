@@ -159,7 +159,7 @@ public class TalismanDAO {
     }
 
     private Talisman montarTalisman(ResultSet rs) throws SQLException {
-        return new Talisman(
+        Talisman talisman = new Talisman(
                 rs.getString("atributo_buff_1"),
                 rs.getDouble("valor_buff_1"),
                 rs.getString("atributo_buff_2"),
@@ -172,5 +172,144 @@ public class TalismanDAO {
                 rs.getString("descricao"),
                 rs.getInt("valor_joias_sombrias")
         );
+
+        talisman.setIdTalisma(rs.getInt("id_talisma"));
+
+        return talisman;
+    }
+    
+    public boolean jogadorPossuiTalisma(int idJogador, int idTalisma) {
+        String sql =
+                "SELECT 1 " +
+                "FROM jogador_talismas " +
+                "WHERE id_jogador = ? " +
+                "AND id_talisma = ?";
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setInt(1, idJogador);
+            stmt.setInt(2, idTalisma);
+
+            ResultSet rs = stmt.executeQuery();
+
+            return rs.next();
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao verificar talismã do jogador: " + e.getMessage(), e);
+        }
+    }
+
+    public boolean comprarParaJogador(int idJogador, Talisman talisman) {
+        Connection connection = null;
+
+        try {
+            connection = ConnectionFactory.getConnection();
+            connection.setAutoCommit(false);
+
+            int idTalisma = talisman.getIdTalisma();
+            int custo = talisman.getValorEmJoiasSombrias();
+
+            if (jogadorPossuiTalismaComConexao(connection, idJogador, idTalisma)) {
+                connection.rollback();
+                return false;
+            }
+
+            boolean pagou = gastarJoiasComConexao(connection, idJogador, custo);
+
+            if (!pagou) {
+                connection.rollback();
+                return false;
+            }
+
+            inserirTalismaJogador(connection, idJogador, idTalisma);
+
+            connection.commit();
+            return true;
+
+        } catch (SQLException e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    throw new RuntimeException("Erro ao desfazer compra do talismã: " + ex.getMessage(), ex);
+                }
+            }
+
+            throw new RuntimeException("Erro ao comprar talismã: " + e.getMessage(), e);
+
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (SQLException e) {
+                    System.out.println("Erro ao fechar conexão: " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private boolean jogadorPossuiTalismaComConexao(
+            Connection connection,
+            int idJogador,
+            int idTalisma
+    ) throws SQLException {
+        String sql =
+                "SELECT 1 " +
+                "FROM jogador_talismas " +
+                "WHERE id_jogador = ? " +
+                "AND id_talisma = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idJogador);
+            stmt.setInt(2, idTalisma);
+
+            ResultSet rs = stmt.executeQuery();
+
+            return rs.next();
+        }
+    }
+
+    private boolean gastarJoiasComConexao(
+            Connection connection,
+            int idJogador,
+            int custo
+    ) throws SQLException {
+        String sql =
+                "UPDATE jogadores SET " +
+                "joias_sombrias = joias_sombrias - ?, " +
+                "atualizado_em = CURRENT_TIMESTAMP " +
+                "WHERE id_jogador = ? " +
+                "AND joias_sombrias >= ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, custo);
+            stmt.setInt(2, idJogador);
+            stmt.setInt(3, custo);
+
+            int linhasAfetadas = stmt.executeUpdate();
+
+            return linhasAfetadas > 0;
+        }
+    }
+
+    private void inserirTalismaJogador(
+            Connection connection,
+            int idJogador,
+            int idTalisma
+    ) throws SQLException {
+        String sql =
+                "INSERT INTO jogador_talismas (" +
+                "id_jogador, " +
+                "id_talisma" +
+                ") VALUES (?, ?)";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idJogador);
+            stmt.setInt(2, idTalisma);
+
+            stmt.executeUpdate();
+        }
     }
 }

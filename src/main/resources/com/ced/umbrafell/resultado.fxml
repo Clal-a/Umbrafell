@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.ced.umbrafell.controller.ResultadoController"
+      alignment="CENTER"
+      spacing="14"
+      prefWidth="420"
+      prefHeight="320"
+      style="-fx-background-color: #151018;">
+
+    <padding>
+        <Insets top="24" right="24" bottom="24" left="24"/>
+    </padding>
+
+    <Label fx:id="lblTitulo"
+           text="Fase concluída!"
+           style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #f2e6c9;"/>
+
+    <Label fx:id="lblFase"
+           text="Fase:"
+           style="-fx-font-size: 16px; -fx-text-fill: white;"/>
+
+    <Label fx:id="lblPontuacao"
+           text="Pontuação:"
+           style="-fx-font-size: 16px; -fx-text-fill: white;"/>
+
+    <Label fx:id="lblJoias"
+           text="Joias:"
+           style="-fx-font-size: 16px; -fx-text-fill: white;"/>
+
+    <Label fx:id="lblInimigos"
+           text="Inimigos:"
+           style="-fx-font-size: 16px; -fx-text-fill: white;"/>
+
+    <Label fx:id="lblDistancia"
+           text="Distância:"
+           style="-fx-font-size: 16px; -fx-text-fill: white;"/>
+
+    <Button fx:id="btnContinuar"
+            text="Continuar"
+            onAction="#onContinuar"
+            prefWidth="180"
+            style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
+</VBox>

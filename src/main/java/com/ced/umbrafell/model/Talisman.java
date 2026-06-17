@@ -14,6 +14,8 @@ public class Talisman extends Item {
 
     private String atributoDebuff;
     private double valorDebuff;
+    
+    private int idTalisma;
 
     public Talisman(String atributoBuff1, double valorBuff1, String atributoBuff2, double valorBuff2, String atributoDebuff, double valorDebuff, int id, String nome, String tipo, String descricao, int valorEmJoiasSombrias) {
         super(id, nome, tipo, descricao, valorEmJoiasSombrias);
@@ -73,5 +75,11 @@ public class Talisman extends Item {
         this.valorDebuff = valorDebuff;
     }
     
-    
+    public int getIdTalisma() {
+        return idTalisma;
+    }
+
+    public void setIdTalisma(int idTalisma) {
+        this.idTalisma = idTalisma;
+    }
 }

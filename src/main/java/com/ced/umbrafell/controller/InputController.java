@@ -91,5 +91,18 @@ public class InputController {
                 b = false;
             }
         });
+    } 
+    
+    public void resetarTeclas() {
+        esc = false;
+        up = false;
+        down = false;
+        left = false;
+        right = false;
+        space = false;
+        b = false;
+
+        spaceClicked = false;
+        bClicked = false;
     }
 }
