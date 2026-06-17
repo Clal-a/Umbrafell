@@ -4,11 +4,14 @@
  */
 package com.ced.umbrafell.controller;
 
+import com.ced.umbrafell.model.Enemy;
 import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
 public class MorcegoController {
+    private Enemy enemyModel;
+    
     private Rectangle morcego;
     private Image upImg;
     private double speed = 150;
@@ -20,7 +23,8 @@ public class MorcegoController {
     private double alvoY = 0;
     private double alturaOriginalY = 100; 
     private double tempoEspera = 0; 
-
+    private double t = 0;
+    
     // --- PATRULHA ---
     private double pontoInicialX;
     private double raioPatrulha = 300; 
@@ -29,6 +33,10 @@ public class MorcegoController {
 
     public MorcegoController(Rectangle morcego){
         this.morcego = morcego;
+        
+        this.enemyModel = new Enemy(
+            2, "Morcego", "Inimigo2", 200, 20, 0, 5, 500
+        );
         
         upImg = new Image(getClass()
                 .getResource("/com/ced/umbrafell/enemy2.png")
@@ -143,5 +151,16 @@ public class MorcegoController {
     public void setSpeed(double speed) {
         this.speed = speed;
     }
+    
+    public Enemy getEnemyModel() {
+        return enemyModel;
+    }
+
+    public void setEnemyModel(Enemy enemyModel) {
+        this.enemyModel = enemyModel;
+    }
+    
     //</editor-fold>
+
+    
 }

@@ -1,5 +1,6 @@
 package com.ced.umbrafell.controller;
 
+import com.ced.umbrafell.model.Enemy;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.image.Image;
@@ -9,6 +10,8 @@ import javafx.scene.shape.Rectangle;
 
 public class DragaoController {
 
+    private Enemy enemyModel;
+    
     private Rectangle dragao;
     
     private Image upImg;
@@ -30,6 +33,10 @@ public class DragaoController {
     
     public DragaoController(Rectangle dragao){
         this.dragao = dragao;
+        
+        this.enemyModel = new Enemy(
+            1, "Dragão", "Inimigo1", 200, 20, 0, 5, 500
+        );
         
         upImg = new Image(getClass()
                 .getResource("/com/ced/umbrafell/enemy.png")
@@ -158,6 +165,14 @@ public class DragaoController {
     
     public void setSpeed(double speed) {
         this.speed = speed;
+    }
+    
+    public Enemy getEnemyModel() {
+        return enemyModel;
+    }
+
+    public void setEnemyModel(Enemy enemyModel) {
+        this.enemyModel = enemyModel;
     }
     //</editor-fold>     
 }

@@ -4,7 +4,9 @@
  */
 package com.ced.umbrafell.controller;
 
+import com.ced.umbrafell.model.Enemy;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
@@ -20,8 +22,7 @@ public class Weapon {
     double height;
     double width;
     
-    private Image atacklImg;
-    private Image atackrImg;
+
     
     private boolean attacking = false;
     private boolean alreadyHit = false;
@@ -39,14 +40,8 @@ public class Weapon {
         this.height = height;
         this.width = width;
         
-        atacklImg = new Image(getClass()
-                .getResource("/com/ced/umbrafell/"+ nome +"l.gif")
-                .toExternalForm());
         
-        atackrImg = new Image(getClass()
-                .getResource("/com/ced/umbrafell/" + nome + "r.gif")
-                .toExternalForm());
-        
+        weapon.setFill(Color.TRANSPARENT);
         weapon.setHeight(height);
         weapon.setWidth(width);
         weapon.setVisible(false);
@@ -62,12 +57,7 @@ public class Weapon {
         attackCooldownTimer = attackCooldownDuration;
 
         weapon.setVisible(true);
-        
-         if (facingRight) {
-            weapon.setFill(new ImagePattern(atackrImg));
-        } else {
-            weapon.setFill(new ImagePattern(atacklImg));
-        }
+
     }
     
     public void startAttackl(boolean facingLeft) {
@@ -81,19 +71,14 @@ public class Weapon {
 
         weapon.setVisible(true);
         
-         if (facingLeft) {
-            weapon.setFill(new ImagePattern(atackrImg));
-        } else {
-            weapon.setFill(new ImagePattern(atacklImg));
-        }
     }
     
-    public void update(double delta, Rectangle enemy) {
+    public void update(double delta, Rectangle enemyRect, Enemy enemyModel, GameplayController gameplay) {
 
         if (attackCooldownTimer > 0) {
-        attackCooldownTimer -= delta;
+            attackCooldownTimer -= delta;
         }
-        
+
         if (!attacking) return;
 
         attackTimer -= delta;
@@ -105,12 +90,22 @@ public class Weapon {
         }
 
         // Detectar acerto uma única vez
-        if (!alreadyHit && weapon.getBoundsInParent().intersects(enemy.getBoundsInParent())) {
+        if (!alreadyHit && weapon.getBoundsInParent().intersects(enemyRect.getBoundsInParent())) {
             alreadyHit = true;
-            enemy.setVisible(false);
-            System.out.println("Acertou o inimigo! Dano = " + damage);
+
+            // Aplica dano ao inimigo
+            enemyModel.setVida(enemyModel.getVida() - damage);
+            System.out.println("Acertou " + enemyModel.getNome() + "! Dano = " + damage);
+
+            // Se a vida zerar, derrota o inimigo
+            if (enemyModel.getVida() <= 0) {
+                if (enemyRect.isVisible()) { // só dropa se ainda estava visível
+                    gameplay.derrotarInimigo(enemyRect, enemyModel); // dropa moeda
+                    enemyRect.setVisible(false); // só depois esconde o inimigo
+                }
+            }
         }
-    } 
+    }
     
     //<editor-fold defaultstate="collapsed" desc="getters e setters">
     public Rectangle getWeapon() {
@@ -153,20 +148,6 @@ public class Weapon {
         this.width = width;
     }
     
-    public Image getAtacklImg() {
-        return atacklImg;
-    }
     
-    public void setAtacklImg(Image atacklImg) {
-        this.atacklImg = atacklImg;
-    }
-    
-    public Image getAtackrImg() {
-        return atackrImg;
-    }
-    
-    public void setAtackrImg(Image atackrImg) {
-        this.atackrImg = atackrImg;
-    }
 //</editor-fold>   
 }

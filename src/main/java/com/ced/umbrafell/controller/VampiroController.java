@@ -4,11 +4,14 @@
  */
 package com.ced.umbrafell.controller;
 
+import com.ced.umbrafell.model.Enemy;
 import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
 public class VampiroController {
+    private Enemy enemyModel;
+    
     private Rectangle vampiro;
     
     private Image Img;
@@ -30,6 +33,10 @@ public class VampiroController {
     
     public VampiroController(Rectangle vampiro){
         this.vampiro = vampiro;
+        
+        this.enemyModel = new Enemy(
+            3, "Vampiro", "Inimigo3", 200, 20, 0, 5, 500
+        );
         
         Img = new Image(getClass()
                 .getResource("/com/ced/umbrafell/Vampiro.png")
@@ -136,4 +143,13 @@ public class VampiroController {
                 break;
         }
     }
+    
+    public Enemy getEnemyModel() {
+        return enemyModel;
+    }
+
+    public void setEnemyModel(Enemy enemyModel) {
+        this.enemyModel = enemyModel;
+    }
+    
 }

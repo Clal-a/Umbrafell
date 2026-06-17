@@ -1,7 +1,9 @@
 package com.ced.umbrafell.controller;
 
+import com.ced.umbrafell.model.Enemy;
 import com.ced.umbrafell.model.InventarioItem;
 import com.ced.umbrafell.model.InventarioRun;
+import com.ced.umbrafell.model.Moeda;
 import com.ced.umbrafell.model.Player;
 import java.util.ArrayList;
 import javafx.animation.AnimationTimer;
@@ -53,6 +55,8 @@ public class GameplayController {
     @FXML
     private Rectangle jogador;
 
+    private java.util.List<Moeda> moedas = new ArrayList<>();
+    
     @FXML
     private Rectangle dragao;
 
@@ -105,7 +109,7 @@ public class GameplayController {
         enemy2 = new MorcegoController(morcego);
         enemy3 = new VampiroController(vampiro);
 
-        sword = new Weapon(player.getWeaponRect(), "atack", 10, 100, 100);
+        sword = new Weapon(player.getWeaponRect(), "atack", 10000, 150, 100);
 
         configurarBackgroundDinamico();
 
@@ -147,9 +151,9 @@ public class GameplayController {
                     return;
                 }
 
-                sword.update(delta, dragao);
-                sword.update(delta, morcego);
-                sword.update(delta, vampiro);
+                sword.update(delta, dragao, enemy1.getEnemyModel(), GameplayController.this);
+                sword.update(delta, morcego, enemy2.getEnemyModel(), GameplayController.this);
+                sword.update(delta, vampiro, enemy3.getEnemyModel(), GameplayController.this);
 
                 enemy1.update(delta, jogador);
                 enemy1.updateProjectiles(delta);
@@ -157,10 +161,34 @@ public class GameplayController {
                 enemy2.update(delta, jogador);
                 
                 enemy3.update(delta, jogador);
+                
+                updateMoedas(delta);
             }
         };
 
         loop.start();
+    }
+    
+    private void updateMoedas(double delta) {
+        for (Moeda moeda : moedas) {
+            moeda.update(delta, jogador, playerModel, 900);
+        }
+    }
+    
+    public void derrotarInimigo(Rectangle enemyRect, Enemy enemyModel) {
+        if (!enemyRect.isVisible()) return; // evita drop duplicado
+        
+        // Drop de moedas/joias
+        Moeda moeda = new Moeda(enemyRect.getTranslateX(), enemyRect.getTranslateY());
+        rootPane.getChildren().add(moeda.getShape());
+        moedas.add(moeda);
+        
+        /*
+        playerModel.setJoiasSombrias(playerModel.getJoiasSombrias() + enemyModel.getRecompensaJoiasSombrias());
+        playerModel.addPontuacao(enemyModel.getRecompensaPontuacao());
+        */
+        System.out.println(enemyModel.getNome() + " derrotado! Dropou " 
+            + enemyModel.getRecompensaJoiasSombrias() + " joias.");
     }
 
     private void configurarBackgroundDinamico() {
