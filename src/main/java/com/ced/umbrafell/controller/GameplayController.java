@@ -4,6 +4,7 @@ import com.ced.umbrafell.dao.PlayerDAO;
 import com.ced.umbrafell.dao.RunDAO;
 import com.ced.umbrafell.model.InventarioItem;
 import com.ced.umbrafell.model.InventarioRun;
+import com.ced.umbrafell.model.Moeda;
 import com.ced.umbrafell.model.Player;
 import com.ced.umbrafell.model.Run;
 import com.ced.umbrafell.util.GameConfig;
@@ -32,11 +33,16 @@ public class GameplayController {
     @FXML
     private Rectangle jogador;
 
+    private java.util.List<Moeda> moedas = new ArrayList<>();
+    
     @FXML
     private Rectangle dragao;
 
     @FXML
     private Rectangle morcego;
+    
+    @FXML
+    private Rectangle vampiro;
 
     @FXML
     private ImageView background1;
@@ -115,6 +121,7 @@ public class GameplayController {
     private InputController input;
     private DragaoController enemy1;
     private MorcegoController enemy2;
+    private VampiroController enemy3;
     private Weapon sword;
 
     /*
@@ -168,8 +175,9 @@ public class GameplayController {
 
         enemy1 = new DragaoController(dragao);
         enemy2 = new MorcegoController(morcego);
+        enemy3 = new VampiroController(vampiro);
 
-        sword = new Weapon(player.getWeaponRect(), "atack", 10, 100, 100);
+        sword = new Weapon(player.getWeaponRect(), "atack", 10000, 150, 100);
 
         distanciaTotalFase = calcularDistanciaTotalFase();
         configurarCenarioFase();
@@ -217,10 +225,36 @@ public class GameplayController {
                 enemy1.updateProjectiles(delta);
 
                 enemy2.update(delta, jogador);
+                
+                enemy3.update(delta, jogador);
+                
+                updateMoedas(delta);
             }
         };
 
         loop.start();
+    }
+    
+    private void updateMoedas(double delta) {
+        for (Moeda moeda : moedas) {
+            moeda.update(delta, jogador, playerModel, 900);
+        }
+    }
+    
+    public void derrotarInimigo(Rectangle enemyRect, Enemy enemyModel) {
+        if (!enemyRect.isVisible()) return; // evita drop duplicado
+        
+        // Drop de moedas/joias
+        Moeda moeda = new Moeda(enemyRect.getTranslateX(), enemyRect.getTranslateY());
+        rootPane.getChildren().add(moeda.getShape());
+        moedas.add(moeda);
+        
+        /*
+        playerModel.setJoiasSombrias(playerModel.getJoiasSombrias() + enemyModel.getRecompensaJoiasSombrias());
+        playerModel.addPontuacao(enemyModel.getRecompensaPontuacao());
+        */
+        System.out.println(enemyModel.getNome() + " derrotado! Dropou " 
+            + enemyModel.getRecompensaJoiasSombrias() + " joias.");
     }
 
     private void adicionarItensDeTesteNoInventario() {
@@ -818,10 +852,7 @@ public class GameplayController {
     private void moverMundo(double scrollMundo) {
         dragao.setTranslateX(dragao.getTranslateX() - scrollMundo);
         morcego.setTranslateX(morcego.getTranslateX() - scrollMundo);
-
-        if (enemy1 != null) {
-            enemy1.moverProjetisNoMundo(scrollMundo);
-        }
+        vampiro.setTranslateX(vampiro.getTranslateX() - scrollMundo);
     }
 
     private double calcularDistanciaTotalFase() {
@@ -924,7 +955,10 @@ public class GameplayController {
             return;
         }
 
-        faseAtual++;
+        Platform.runLater(() -> {
+            pausado = true;
+            onAbrirInventario();
+            pausado = false;
 
         if (playerModel != null) {
             playerModel.setFaseAtual(faseAtual);

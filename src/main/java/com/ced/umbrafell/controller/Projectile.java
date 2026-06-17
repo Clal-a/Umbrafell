@@ -22,7 +22,7 @@ public class Projectile {
                 .toExternalForm());
     
     private double dx, dy;
-    private double speed = 350;
+    private double speed = 450;
 
     public Projectile(double startX, double startY, double dx, double dy) {
         projectile = new Rectangle(100, 100);
