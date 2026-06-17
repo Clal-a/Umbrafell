@@ -74,12 +74,17 @@ public class Weapon {
     }
     
     public void update(double delta, Rectangle enemyRect, Enemy enemyModel, GameplayController gameplay) {
+        if (enemyRect == null || enemyModel == null || gameplay == null || !enemyRect.isVisible()) {
+            return;
+        }
 
         if (attackCooldownTimer > 0) {
             attackCooldownTimer -= delta;
         }
 
-        if (!attacking) return;
+        if (!attacking) {
+            return;
+        }
 
         attackTimer -= delta;
 
@@ -94,15 +99,14 @@ public class Weapon {
             alreadyHit = true;
 
             // Aplica dano ao inimigo
-            enemyModel.setVida(enemyModel.getVida() - damage);
+            enemyModel.receberDano(damage);
+
             System.out.println("Acertou " + enemyModel.getNome() + "! Dano = " + damage);
 
             // Se a vida zerar, derrota o inimigo
-            if (enemyModel.getVida() <= 0) {
-                if (enemyRect.isVisible()) { // só dropa se ainda estava visível
-                    gameplay.derrotarInimigo(enemyRect, enemyModel); // dropa moeda
-                    enemyRect.setVisible(false); // só depois esconde o inimigo
-                }
+            if (enemyModel.estaMorto()) {
+                gameplay.derrotarInimigo(enemyRect, enemyModel);
+                enemyRect.setVisible(false);
             }
         }
     }
