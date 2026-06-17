@@ -25,6 +25,10 @@ public class DragaoController {
     
     private double speed = 0;
     
+    private double animationTimer = 0;
+    private final double frameDuration = 0.35;
+    private int animState = 0;
+    
     public DragaoController(Rectangle dragao){
         this.dragao = dragao;
         

@@ -7,6 +7,8 @@ import com.ced.umbrafell.model.InventarioRun;
 import com.ced.umbrafell.model.Moeda;
 import com.ced.umbrafell.model.Player;
 import com.ced.umbrafell.model.Run;
+import com.ced.umbrafell.model.Enemy;
+
 import com.ced.umbrafell.util.GameConfig;
 import com.ced.umbrafell.util.SceneManeger;
 
@@ -136,6 +138,7 @@ public class GameplayController {
 
     private boolean morcegoContabilizado = false;
     private boolean dragaoContabilizado = false;
+    private boolean vampiroContabilizado = false;
 
     private int pontuacaoRun = 0;
     private int joiasRun = 0;
@@ -216,8 +219,17 @@ public class GameplayController {
                     return;
                 }
 
-                sword.update(delta, dragao);
-                sword.update(delta, morcego);
+                if (enemy1 != null && dragao != null) {
+                    sword.update(delta, dragao, enemy1.getEnemyModel(), GameplayController.this);
+                }
+
+                if (enemy2 != null && morcego != null) {
+                    sword.update(delta, morcego, enemy2.getEnemyModel(), GameplayController.this);
+                }
+
+                if (enemy3 != null && vampiro != null) {
+                    sword.update(delta, vampiro, enemy3.getEnemyModel(), GameplayController.this);
+                }
                 
                 verificarProgressoFase();
 
@@ -352,6 +364,7 @@ public class GameplayController {
         inimigosDerrotadosNaFase = 0;
         morcegoContabilizado = false;
         dragaoContabilizado = false;
+        vampiroContabilizado = false;
 
         totalInimigosFase = calcularQuantidadeInimigosDaFase();
 
@@ -366,6 +379,23 @@ public class GameplayController {
         atualizarCenarioPorScroll();
 
         System.out.println("Distância da fase: " + distanciaTotalFase);
+    }
+    
+    private void verificarProgressoFase() {
+        if (morcego != null && !morcego.isVisible() && !morcegoContabilizado) {
+            morcegoContabilizado = true;
+            registrarInimigoDerrotado("Morcego");
+        }
+
+        if (dragao != null && !dragao.isVisible() && !dragaoContabilizado) {
+            dragaoContabilizado = true;
+            registrarInimigoDerrotado("Dragão");
+        }
+
+        if (vampiro != null && !vampiro.isVisible() && !vampiroContabilizado) {
+            vampiroContabilizado = true;
+            registrarInimigoDerrotado("Vampiro");
+        }
     }
     
     private void posicionarJogadorInicioFase() {
@@ -396,27 +426,33 @@ public class GameplayController {
     }
 
     private void respawnarInimigosBasicos() {
-        dragao.setVisible(true);
-        morcego.setVisible(true);
+        if (dragao != null) {
+            dragao.setVisible(true);
+        }
+
+        if (morcego != null) {
+            morcego.setVisible(true);
+        }
+
+        if (vampiro != null) {
+            vampiro.setVisible(true);
+        }
 
         double chao = ponteHitbox != null ? ponteHitbox.getY() : 300;
 
-        dragao.setTranslateX(900 + (faseAtual * 180));
-        dragao.setTranslateY(chao - dragao.getHeight());
-
-        morcego.setTranslateX(600 + (faseAtual * 140));
-        morcego.setTranslateY(chao - morcego.getHeight() - 140);
-    }
-    
-    private void verificarProgressoFase() {
-        if (!morcego.isVisible() && !morcegoContabilizado) {
-            morcegoContabilizado = true;
-            registrarInimigoDerrotado("Morcego");
+        if (dragao != null) {
+            dragao.setTranslateX(900 + (faseAtual * 180));
+            dragao.setTranslateY(chao - dragao.getHeight());
         }
 
-        if (!dragao.isVisible() && !dragaoContabilizado) {
-            dragaoContabilizado = true;
-            registrarInimigoDerrotado("Dragão");
+        if (morcego != null) {
+            morcego.setTranslateX(600 + (faseAtual * 140));
+            morcego.setTranslateY(chao - morcego.getHeight() - 140);
+        }
+
+        if (vampiro != null) {
+            vampiro.setTranslateX(1200 + (faseAtual * 160));
+            vampiro.setTranslateY(chao - vampiro.getHeight());
         }
     }
 
@@ -442,10 +478,14 @@ public class GameplayController {
     }
 
     private int calcularJoiasPorInimigo(String inimigo) {
-        int recompensaBase = 4;
+        int recompensaBase = GameConfig.RECOMPENSA_BASE_JOIAS;
 
         if ("Morcego".equals(inimigo)) {
             return recompensaBase;
+        }
+
+        if ("Vampiro".equals(inimigo)) {
+            return recompensaBase * 2;
         }
 
         if ("Dragão".equals(inimigo)) {
@@ -458,6 +498,10 @@ public class GameplayController {
     private int calcularPontuacaoPorInimigo(String inimigo) {
         if ("Morcego".equals(inimigo)) {
             return 100;
+        }
+
+        if ("Vampiro".equals(inimigo)) {
+            return 200;
         }
 
         if ("Dragão".equals(inimigo)) {
@@ -850,9 +894,21 @@ public class GameplayController {
     }
 
     private void moverMundo(double scrollMundo) {
-        dragao.setTranslateX(dragao.getTranslateX() - scrollMundo);
-        morcego.setTranslateX(morcego.getTranslateX() - scrollMundo);
-        vampiro.setTranslateX(vampiro.getTranslateX() - scrollMundo);
+        if (dragao != null) {
+            dragao.setTranslateX(dragao.getTranslateX() - scrollMundo);
+        }
+
+        if (morcego != null) {
+            morcego.setTranslateX(morcego.getTranslateX() - scrollMundo);
+        }
+
+        if (vampiro != null) {
+            vampiro.setTranslateX(vampiro.getTranslateX() - scrollMundo);
+        }
+
+        if (enemy1 != null) {
+            enemy1.moverProjetisNoMundo(scrollMundo);
+        }
     }
 
     private double calcularDistanciaTotalFase() {
@@ -955,10 +1011,7 @@ public class GameplayController {
             return;
         }
 
-        Platform.runLater(() -> {
-            pausado = true;
-            onAbrirInventario();
-            pausado = false;
+        faseAtual++;
 
         if (playerModel != null) {
             playerModel.setFaseAtual(faseAtual);
