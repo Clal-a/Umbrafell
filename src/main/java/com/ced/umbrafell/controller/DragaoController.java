@@ -23,13 +23,7 @@ public class DragaoController {
     private double shootTimer = 0;
     private List<Projectile> projectiles = new ArrayList<>();
     
-    private double speed = 0; // Mantido em 0 pois o dragão é estático
-
-    // --- VARIÁVEIS PARA A ANIMAÇÃO DE VIGÍLIA ---
-    private double animationTimer = 0;
-    private double frameDuration = 0.5; // Tempo (em segundos) que ele passa olhando para cada lado
-    private int animState = 0; // 0 = Centro, 1 = Direita, 2 = Centro, 3 = Esquerda
-    // --------------------------------------------
+    private double speed = 0;
     
     public DragaoController(Rectangle dragao){
         this.dragao = dragao;

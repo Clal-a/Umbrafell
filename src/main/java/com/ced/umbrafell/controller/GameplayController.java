@@ -87,20 +87,18 @@ public class GameplayController {
     private Rectangle ponteHitbox;
 
     public void startGame(Scene scene) {
-        
+
         input = new InputController(scene);
 
         playerModel = new Player("Aldric");
-
-        
         inventarioRun = new InventarioRun();
+        
+        adicionarItensDeTesteNoInventario();
 
         player = new PlayerController(jogador);
 
-        Pane pane = (Pane) jogador.getParent();
-
-        pane.getChildren().add(player.getPersonImg());
-        pane.getChildren().add(player.getWeaponRect());
+        ((Pane) jogador.getParent()).getChildren().add(player.getPersonImg());
+        ((Pane) jogador.getParent()).getChildren().add(player.getWeaponRect());
 
         player.getWeaponRect().setStroke(Color.BLACK);
         player.getWeaponRect().setStrokeWidth(3);
@@ -142,11 +140,10 @@ public class GameplayController {
                     sword.startAttackl(player.isFacingLeft());
                     input.spaceClicked = false;
                 }
-                
-                if (input.b && !inventarioAberto) {
-                    System.out.println("AAAAAAAAAAAAAA");
-                    input.b = false;
-                    adicionarItensDeTesteNoInventario();
+
+                if (input.bClicked && !inventarioAberto) {
+                    System.out.println("b cic");
+                    input.bClicked = false;
                     solicitarAbrirInventario();
                     return;
                 }
@@ -257,7 +254,7 @@ public class GameplayController {
     }
 
     private void moverMundo(double scrollMundo) {
-        dragao.setTranslateX(dragao.getTranslateX() - scrollMundo);
+        // dragao.setTranslateX(dragao.getTranslateX() - scrollMundo);
         morcego.setTranslateX(morcego.getTranslateX() - scrollMundo);
         vampiro.setTranslateX(vampiro.getTranslateX() - scrollMundo);
     }
