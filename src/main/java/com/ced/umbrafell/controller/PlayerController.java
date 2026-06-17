@@ -26,10 +26,13 @@ public class PlayerController {
     
     private boolean facing_right;
     private boolean facing_left;
-    private Image upImg;
+    private Image upRImg;
+    private Image upLImg;
     private Image downImg;
     private Image leftImg;
     private Image rightImg;
+    private Image attackRImg;
+    private Image attackLImg;
     private ImageView personImg;
     private Rectangle weaponRect;
 
@@ -46,28 +49,40 @@ public class PlayerController {
         weaponRect = new Rectangle(40, 40);
         weaponRect.setVisible(false);
         
-        upImg = new Image(getClass()
-                .getResource("/com/ced/umbrafell/person(Updated)Up.png")
+        upRImg = new Image(getClass()
+                .getResource("/com/ced/umbrafell/player(Jump-Right).png")
+                .toExternalForm());
+        
+        upLImg = new Image(getClass()
+                .getResource("/com/ced/umbrafell/player(Jump-Left).png")
                 .toExternalForm());
 
         downImg = new Image(getClass()
-                .getResource("/com/ced/umbrafell/person.png")
+                .getResource("/com/ced/umbrafell/player(Attack1-Right).png")
                 .toExternalForm());
 
         leftImg = new Image(getClass()
-                .getResource("/com/ced/umbrafell/person(Updated1.2)Left.png")
+                .getResource("/com/ced/umbrafell/player(Left).png")
                 .toExternalForm());
 
         rightImg = new Image(getClass()
-                .getResource("/com/ced/umbrafell/person(Updated1.2)Right.png")
-                .toExternalForm());    
+                .getResource("/com/ced/umbrafell/player(Right).png")
+                .toExternalForm());   
+        
+        attackRImg = new Image(getClass()
+                .getResource("/com/ced/umbrafell/player(Attack2-Right).png")
+                .toExternalForm());
+        
+        attackLImg = new Image(getClass()
+                .getResource("/com/ced/umbrafell/player(Attack2-Left).png")
+                .toExternalForm());
 
         player.setHeight(150);
-        player.setWidth(100);
+        player.setWidth(50);
         player.setFill(Color.TRANSPARENT);
         personImg = new ImageView(downImg);
-        personImg.setFitWidth(120);
-        personImg.setFitHeight(150);
+        personImg.setFitWidth(280);
+        personImg.setFitHeight(300);
     }
 
     public void update(double delta, InputController input) {
@@ -101,19 +116,12 @@ public class PlayerController {
             onGround = true;
         }
         
-        
-        if (facing_right) {
-            weaponRect.setTranslateX(player.getTranslateX() + player.getWidth());
-        }
-            weaponRect.setTranslateY(player.getTranslateY());
-        
-        if (facing_left) {
-            weaponRect.setTranslateX(player.getTranslateX() - player.getWidth());
-        }
-            weaponRect.setTranslateY(player.getTranslateY());
-        
         if (input.up) {
-            personImg.setImage(upImg);
+            if (facing_right) {
+                personImg.setImage(upRImg);
+            } else if (facing_left) {
+                personImg.setImage(upLImg);
+            }
         } else if (input.down) {
             personImg.setImage(downImg);
         } else if (input.left) {
@@ -124,20 +132,20 @@ public class PlayerController {
             personImg.setImage(rightImg);
             facing_right = true;
             facing_left = false;
+        } else if (input.space) {
+            if (facing_right) {
+            personImg.setImage(attackRImg);
+            } else if (facing_left) {
+                personImg.setImage(attackLImg);
+            }
         }
     }
     
     public void sincronizarVisualComHitbox() {
-        personImg.setTranslateX(
-                player.getTranslateX()
-                + (player.getWidth() / 2)
-                - (personImg.getFitWidth() / 2)
+        personImg.setTranslateX(player.getTranslateX() + (player.getWidth() / 2) - (personImg.getFitWidth() / 2)
         );
 
-        personImg.setTranslateY(
-                player.getTranslateY()
-                + player.getHeight()
-                - personImg.getFitHeight()
+        personImg.setTranslateY(player.getTranslateY() - 80
         );
 
         if (facing_right) {
@@ -145,7 +153,7 @@ public class PlayerController {
         }
 
         if (facing_left) {
-            weaponRect.setTranslateX(player.getTranslateX() - player.getWidth());
+            weaponRect.setTranslateX(player.getTranslateX() - player.getWidth() * 2 );
         }
 
         weaponRect.setTranslateY(player.getTranslateY());

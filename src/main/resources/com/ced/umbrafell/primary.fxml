@@ -26,8 +26,8 @@
       <Rectangle fx:id="jogador"
                  stroke="black"
                  strokeWidth="3"
-                 translateX="700"
-                 translateY="600" />
+                 translateX="500"
+                 translateY="750" />
 
       <Rectangle fx:id="dragao"
                  stroke="black"
@@ -38,8 +38,15 @@
       <Rectangle fx:id="morcego"
                  stroke="black"
                  strokeWidth="3"
-                 translateX="500"
+                 translateX="1500"
                  translateY="300"/>
+      
+      <Rectangle fx:id="vampiro"
+                 stroke="black"
+                 strokeWidth="3"
+                 translateX="1500"
+                 translateY="750"/>
+      
       
       <Rectangle fx:id="ponteHitbox"
            x="0"
