@@ -219,8 +219,13 @@ public class GameplayController {
         if (ponteHitbox != null) {
             player.setLimiteChao(ponteHitbox.getY());
         }
-        
-        player.update(delta, input);
+
+        // 1. Atualiza a física, inputs E roda a nossa nova lógica de animação
+        player.update(delta, input); 
+
+        // 2. Garante que a imagem recortada siga o retângulo perfeitamente
+        player.sincronizarVisualComHitbox(); 
+
         atualizarCameraECenario();
     }
     
@@ -622,27 +627,34 @@ public class GameplayController {
         if (jogadorDerrotado || enemy1 == null || jogador == null) {
             return;
         }
-        
+
         for (Projectile projetil : enemy1.getProjectiles()) {
-            if (projetil.getRect().isVisible()
+            // Verifica se a hitbox está visível e se intercepta o jogador
+            if (projetil.getRect().isVisible() 
                     && projetil.getRect().getBoundsInParent().intersects(jogador.getBoundsInParent())) {
-                
-                projetil.getRect().setVisible(false);
+
+                // ANTES: projetil.getRect().setVisible(false);
+                // AGORA: Some com o projétil completo (Hitbox + Imagem)
+                projetil.setVisible(false); 
+
                 aplicarDanoAoJogador(enemy1.getEnemyModel().getDano(), "Fogo do Dragão");
             }
         }
     }
-    
+
     private void verificarDanoProjetilQuimera() {
         if (jogadorDerrotado || enemy5 == null || jogador == null) {
             return;
         }
-        
+
         for (Projectile projetil : enemy5.getProjectiles()) {
             if (projetil.getRect().isVisible()
                     && projetil.getRect().getBoundsInParent().intersects(jogador.getBoundsInParent())) {
-                
-                projetil.getRect().setVisible(false);
+
+                // ANTES: projetil.getRect().setVisible(false);
+                // AGORA: Some com o projétil completo (Hitbox + Imagem)
+                projetil.setVisible(false); 
+
                 aplicarDanoAoJogador(enemy5.getEnemyModel().getDano(), "Fogo da Quimera");
             }
         }

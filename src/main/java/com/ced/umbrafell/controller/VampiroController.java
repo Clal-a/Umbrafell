@@ -1,147 +1,248 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.ced.umbrafell.controller;
 
 import com.ced.umbrafell.model.Enemy;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.image.Image;
-import javafx.scene.paint.ImagePattern;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 public class VampiroController {
     private Enemy enemyModel;
     
-    private Rectangle vampiro;
+    private Rectangle vampiroHitbox;
+    private ImageView vampiroImg;
     
-    private Image Img;
-    private Image ImgLeft;
-    private Image ImgRight;
+    // --- SPRITESHEETS ---
+    private Image walkSheet;
+    private Image attackSheet; // Nova sheet de ataque integrada
     
-    private double speed = 100; // Velocidade normal de patrulha
+    private double animationTime = 0;
+    private double attackAnimationTime = 0; // Tempo separado para o ataque
+    private double escalaVisual = 1.4; 
+    
+    // Configuração exata para a grade 2x3 de Caminhada (vampire(Walking).png)
+    private final int TOTAL_FRAMES = 6; 
+    private final int COLUNAS = 2;
+    private final int LINHAS = 3;
+    private final double FRAME_DURATION = 0.15;
 
-    // --- MÁQUINA DE ESTADOS DO VAMPIRO ---
+    // --- CONFIGURAÇÃO DO ATAQUE (vampire(Attack).png) ---
+    private final int ATTACK_TOTAL_FRAMES = 3; // 3 frames válidos
+    private final int ATTACK_COLUNAS = 2;
+    private final int ATTACK_LINHAS = 2;
+    private final double ATTACK_FRAME_DURATION = 0.12; // Ataque ligeiramente mais rápido
+
+    private double speed = 100; 
+
     private enum Estado { PATRULHANDO, AVANCO_VIOLENTO, RECUPERANDO }
     private Estado estadoAtual = Estado.PATRULHANDO;
 
     private double alvoX = 0;
     private double tempoEspera = 0;
     private double pontoInicialX;
-    private double raioPatrulha = 250; // O quão longe ele anda no chão antes de voltar
-    private int direcaoPatrulha = 1;   // 1 = Direita, -1 = Esquerda
-    // -------------------------------------
+    private double raioPatrulha = 250; 
+    private int direcaoPatrulha = 1;   
     
     public VampiroController(Rectangle vampiro){
-        this.vampiro = vampiro;
+        this.vampiroHitbox = vampiro;
         
         this.enemyModel = new Enemy(
             3, "Vampiro", "Inimigo3", 100, 20, 0, 5, 500
         );
         
-        Img = new Image(getClass()
-                .getResource("/com/ced/umbrafell/Vampiro.png")
-                .toExternalForm());
+        // Carrega ambas as folhas de sprites
+        walkSheet = new Image(getClass().getResource("/com/ced/umbrafell/vampire(Walking).png").toExternalForm());
+        attackSheet = new Image(getClass().getResource("/com/ced/umbrafell/vampire(Attack).png").toExternalForm());
         
-        ImgLeft = new Image(getClass()
-                .getResource("/com/ced/umbrafell/Vampiro1.png")
-                .toExternalForm());
-        
-        ImgRight = new Image(getClass()
-                .getResource("/com/ced/umbrafell/Vampiro2.png")
-                .toExternalForm());
-        
-        vampiro.setFill(new ImagePattern(Img));
-        vampiro.setHeight(150);
-        vampiro.setWidth(100);
+        // Configurações da Hitbox de colisão
+        vampiroHitbox.setHeight(150); 
+        vampiroHitbox.setWidth(50);  
+        vampiroHitbox.setFill(Color.TRANSPARENT); 
 
-        // Salva a posição inicial horizontal para a patrulha terrestre
-        this.pontoInicialX = vampiro.getTranslateX();
+        // Começa com a imagem de caminhada
+        vampiroImg = new ImageView(walkSheet);
+        vampiroImg.setSmooth(false);
+        vampiroImg.setPreserveRatio(false); 
+
+        if (vampiroHitbox.getParent() instanceof Pane) {
+            Pane rootPane = (Pane) vampiroHitbox.getParent();
+            rootPane.getChildren().add(vampiroImg);
+        }
+
+        this.pontoInicialX = vampiroHitbox.getTranslateX();
+        
+        atualizarAnimacaoCaminhada(0);
+        sincronizarVisualComHitbox();
+    }
+    
+    public void sincronizarVisualComHitbox() {
+        vampiroImg.setTranslateX(vampiroHitbox.getTranslateX() + (vampiroHitbox.getWidth() / 2) - (vampiroImg.getFitWidth() / 2));
+        vampiroImg.setTranslateY(vampiroHitbox.getTranslateY() + vampiroHitbox.getHeight() - vampiroImg.getFitHeight());
+        vampiroImg.setVisible(vampiroHitbox.isVisible());
     }
     
     public void update(double delta, Rectangle player) {
-        if (!vampiro.isVisible()) return;
+        if (!vampiroHitbox.isVisible()) {
+            sincronizarVisualComHitbox();
+            return;
+        }
         
-        double enemyX = vampiro.getTranslateX();
-        double enemyY = vampiro.getTranslateY();
+        double enemyX = vampiroHitbox.getTranslateX();
+        double enemyY = vampiroHitbox.getTranslateY();
 
         switch (estadoAtual) {
             case PATRULHANDO:
-                // 1. Movimento de Patrulha no chão (Apenas no eixo X)
-                vampiro.setTranslateX(enemyX + (speed * direcaoPatrulha * delta));
-
-                // Atualiza o sprite baseado na direção da patrulha
-                if (direcaoPatrulha > 0) {
-                    vampiro.setFill(new ImagePattern(Img));
-                    vampiro.setFill(new ImagePattern(ImgRight));
-                } else {
-                    vampiro.setFill(new ImagePattern(Img));
-                    vampiro.setFill(new ImagePattern(ImgLeft));
+                // Troca para a folha de caminhada se necessário
+                if (vampiroImg.getImage() != walkSheet) {
+                    vampiroImg.setImage(walkSheet);
                 }
 
-                // Inverte o sentido ao atingir os limites da patrulha
-                if (vampiro.getTranslateX() > pontoInicialX + raioPatrulha) {
+                vampiroHitbox.setTranslateX(enemyX + (speed * direcaoPatrulha * delta));
+
+                atualizarAnimacaoCaminhada(delta);
+                vampiroImg.setScaleX(direcaoPatrulha > 0 ? 1 : -1);
+
+                if (vampiroHitbox.getTranslateX() > pontoInicialX + raioPatrulha) {
                     direcaoPatrulha = -1;
-                } else if (vampiro.getTranslateX() < pontoInicialX - raioPatrulha) {
+                } else if (vampiroHitbox.getTranslateX() < pontoInicialX - raioPatrulha) {
                     direcaoPatrulha = 1;
                 }
 
-                // 2. Visão do Vampiro (Detectar o player na mesma linha de chão)
                 double dxVisao = player.getTranslateX() - enemyX;
                 double dyVisao = Math.abs(player.getTranslateY() - enemyY);
 
-                // Ele só ataca se o player estiver perto horizontalmente (350px) e na mesma altura (dy < 80px)
                 if (Math.abs(dxVisao) < 350 && dyVisao < 80) {
-                    // Trava a posição X do player para o avanço em linha reta
                     alvoX = player.getTranslateX();
+                    attackAnimationTime = 0; // Reseta o tempo da nova animação
                     estadoAtual = Estado.AVANCO_VIOLENTO;
                 }
                 break;
 
             case AVANCO_VIOLENTO:
-                // O avanço acontece apenas no eixo X (Horizontal)
+                if (vampiroImg.getImage() != attackSheet) {
+                    vampiroImg.setImage(attackSheet);
+                }
+
                 double dxAvanço = alvoX - enemyX;
-                double direcaoAvanço = Math.signum(dxAvanço); // Retorna 1 se positivo, -1 se negativo
+                double direcaoAvanço = Math.signum(dxAvanço); 
 
-                // Muda o sprite para o lado do avanço violento
-                if (direcaoAvanço > 0) {
-                    vampiro.setFill(new ImagePattern(ImgRight));
+                // Atualiza a escala horizontal baseada na direção do ataque (1 ou -1)
+                vampiroImg.setScaleX(direcaoAvanço > 0 ? 1 : -1);
+
+                if (Math.abs(dxAvanço) > 30) {
+                    forçarFrameAtaque(1); 
+                    vampiroHitbox.setTranslateX(enemyX + (direcaoAvanço * speed * 3.5 * delta));
                 } else {
-                    vampiro.setFill(new ImagePattern(ImgLeft));
+                    atualizarAnimacaoAtaque(delta);
+                    
+                    int frameAtual = (int) (attackAnimationTime / ATTACK_FRAME_DURATION);
+                    if (frameAtual >= ATTACK_TOTAL_FRAMES) {
+                        tempoEspera = 1.5; 
+                        
+                        // CORREÇÃO AQUI: Se ele estava avançando para a esquerda, 
+                        // define a patrulha para começar olhando para a esquerda também!
+                        direcaoPatrulha = (direcaoAvanço != 0) ? (int)direcaoAvanço : 1;
+                        
+                        estadoAtual = Estado.RECUPERANDO;
+                    }
                 }
 
-                // Velocidade do avanço é MUITO alta (multiplicada por 3.5)
-                if (Math.abs(dxAvanço) > 15) {
-                    vampiro.setTranslateX(enemyX + (direcaoAvanço * speed * 3.5 * delta));
-                } else {
-                    // Terminou o avanço, entra em estado de recuperação (fadigado)
-                    tempoEspera = 1.5; // Fica parado por 1.5 segundos
-                    estadoAtual = Estado.RECUPERANDO;
-                }
-
-                // Lógica de colisão com o Player durante o avanço
+                // Colisão com o Player
                 double dxPlayer = player.getTranslateX() - enemyX;
                 double dyPlayer = player.getTranslateY() - enemyY;
                 double distanciaReal = Math.sqrt(dxPlayer * dxPlayer + dyPlayer * dyPlayer);
 
                 if (distanciaReal < 60) {
                     System.out.println("PLAYER ATROPELADO PELO AVANÇO DO VAMPIRO!");
-                    tempoEspera = 1.0; // Tempo menor de recuperação se acertar o golpe
+                    tempoEspera = 1.0; 
+                    direcaoPatrulha = (direcaoAvanço != 0) ? (int)direcaoAvanço : 1; // CORREÇÃO AQUI TAMBÉM
                     estadoAtual = Estado.RECUPERANDO;
                 }
                 break;
 
             case RECUPERANDO:
-                // O vampiro usa o sprite padrão (olhando para frente/neutro) enquanto recupera o fôlego
-                vampiro.setFill(new ImagePattern(Img));
+                if (vampiroImg.getImage() != walkSheet) {
+                    vampiroImg.setImage(walkSheet);
+                }
+                animationTime = 0;
+                atualizarAnimacaoCaminhada(0);
+                
+                // --- MODIFICADO AQUI ---
+                // Em vez de travar em 1, ele mantém a escala baseada na direção que ele terminou o golpe!
+                vampiroImg.setScaleX(direcaoPatrulha > 0 ? 1 : -1);
 
                 tempoEspera -= delta;
                 if (tempoEspera <= 0) {
-                    // Após descansar, ele redefine o ponto inicial de patrulha onde ele está agora
-                    pontoInicialX = vampiro.getTranslateX();
+                    pontoInicialX = vampiroHitbox.getTranslateX();
                     estadoAtual = Estado.PATRULHANDO;
                 }
                 break;
         }
+
+        sincronizarVisualComHitbox();
+    }
+    
+    // --- ANIMAÇÃO DE CAMINHADA (Grade 2x3) ---
+    private void atualizarAnimacaoCaminhada(double delta) {
+        animationTime += delta;
+        int frameAtual = (int) (animationTime / FRAME_DURATION) % TOTAL_FRAMES;
+
+        double frameWidth = walkSheet.getWidth() / COLUNAS;
+        double frameHeight = walkSheet.getHeight() / LINHAS;
+
+        int colunaAtual = frameAtual % COLUNAS;
+        int linhaAtual = frameAtual / COLUNAS;
+
+        double posX = colunaAtual * frameWidth;
+        double posY = linhaAtual * frameHeight;
+
+        vampiroImg.setFitWidth(frameWidth * escalaVisual);
+        vampiroImg.setFitHeight(frameHeight * escalaVisual);
+        vampiroImg.setViewport(new Rectangle2D(posX, posY, frameWidth, frameHeight));
+    }
+
+    // --- NOVA: ANIMAÇÃO DE ATAQUE (Grade 2x2, max 3 frames) ---
+    private void atualizarAnimacaoAtaque(double delta) {
+        attackAnimationTime += delta;
+        // Corta usando o resto baseado em ATTACK_TOTAL_FRAMES (3) para ignorar o quadrado vazio no fim da folha
+        int frameAtual = (int) (attackAnimationTime / ATTACK_FRAME_DURATION) % ATTACK_TOTAL_FRAMES;
+
+        double frameWidth = attackSheet.getWidth() / ATTACK_COLUNAS;
+        double frameHeight = attackSheet.getHeight() / ATTACK_LINHAS;
+
+        int colunaAtual = frameAtual % ATTACK_COLUNAS;
+        int linhaAtual = frameAtual / ATTACK_COLUNAS;
+
+        double posX = colunaAtual * frameWidth;
+        double posY = linhaAtual * frameHeight;
+
+        vampiroImg.setFitWidth(frameWidth * escalaVisual);
+        vampiroImg.setFitHeight(frameHeight * escalaVisual);
+        vampiroImg.setViewport(new Rectangle2D(posX, posY, frameWidth, frameHeight));
+    }
+    
+    private void forçarFrameAtaque(int frameDesejado) {
+        double frameWidth = attackSheet.getWidth() / ATTACK_COLUNAS;
+        double frameHeight = attackSheet.getHeight() / ATTACK_LINHAS;
+
+        int colunaAtual = frameDesejado % ATTACK_COLUNAS;
+        int linhaAtual = frameDesejado / ATTACK_COLUNAS;
+
+        double posX = colunaAtual * frameWidth;
+        double posY = linhaAtual * frameHeight;
+
+        vampiroImg.setFitWidth(frameWidth * escalaVisual);
+        vampiroImg.setFitHeight(frameHeight * escalaVisual);
+        vampiroImg.setViewport(new Rectangle2D(posX, posY, frameWidth, frameHeight));
+        
+        // Mantém o tempo da animação sincronizado para começar logo após o frame travado
+        attackAnimationTime = frameDesejado * ATTACK_FRAME_DURATION;
+    }
+    
+    public Rectangle getVampiro() {
+        return vampiroHitbox;
     }
     
     public Enemy getEnemyModel() {
@@ -151,5 +252,4 @@ public class VampiroController {
     public void setEnemyModel(Enemy enemyModel) {
         this.enemyModel = enemyModel;
     }
-    
 }
