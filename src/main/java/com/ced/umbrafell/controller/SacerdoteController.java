@@ -226,6 +226,19 @@ public class SacerdoteController {
         attackAnimationTime = frameDesejado * ATTACK_FRAME_DURATION;
     }
     
+    public void moverNoMundo(double scrollMundo) {
+        sacerdoteHitbox.setTranslateX(sacerdoteHitbox.getTranslateX() - scrollMundo);
+
+        pontoInicialX -= scrollMundo;
+        alvoX -= scrollMundo;
+
+        sincronizarVisualComHitbox();
+    }
+
+    public void redefinirPontoPatrulha() {
+        pontoInicialX = sacerdoteHitbox.getTranslateX();
+    }
+    
     public Rectangle getSacerdote() {
         return sacerdoteHitbox;
     }

@@ -24,6 +24,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -437,6 +438,10 @@ public class GameplayController {
             
             if (enemy4 != null && enemy4.getEnemyModel() != null) {
                 enemy4.getEnemyModel().restaurarVida();
+                
+                if (enemy4 != null) {
+                    enemy4.redefinirPontoPatrulha();
+                }
             }
         }
         
@@ -446,8 +451,12 @@ public class GameplayController {
                 quimera.setTranslateX(1200 + (faseAtual * 160));
                 quimera.setTranslateY(chao - quimera.getHeight());
 
-                if (enemy5 != null && enemy5.getEnemyModel() != null) {
-                    enemy5.getEnemyModel().restaurarVida();
+                if (enemy5 != null) {
+                    enemy5.redefinirPontoPatrulha();
+
+                    if (enemy5.getEnemyModel() != null) {
+                        enemy5.getEnemyModel().restaurarVida();
+                    }
                 }
             } else {
                 quimera.setVisible(false); // oculta na fase 1
@@ -804,35 +813,39 @@ public class GameplayController {
     //<editor-fold defaultstate="collapsed" desc="FASE E PROGRESSÃO">
     private void iniciarFase() {
         System.out.println("Iniciando fase " + faseAtual);
-        
+
         if (input != null) {
             input.resetarTeclas();
         }
-        
+
         ultimoFrame = 0;
-        
+
         faseConcluida = false;
         jogadorDerrotado = false;
         tempoInvulneravel = 0;
-        
+
         scrollFase = 0;
         distanciaTotalFase = calcularDistanciaTotalFase();
-        
+
         inimigosDerrotadosNaFase = 0;
         morcegoContabilizado = false;
         dragaoContabilizado = false;
         vampiroContabilizado = false;
-        
+        sacerdoteContabilizado = false;
+        quimeraContabilizado = false;
+
         if (playerModel != null) {
             playerModel.setFaseAtual(faseAtual);
         }
-        
+
+        aplicarFundoDaFase();
+
         posicionarJogadorInicioFase();
         respawnarInimigosBasicos();
-        
+
         reajustarTamanhoCenario();
         atualizarCenarioPorScroll();
-        
+
         System.out.println("Distância da fase: " + distanciaTotalFase);
     }
     
@@ -946,6 +959,46 @@ public class GameplayController {
         reajustarTamanhoCenario();
     }
     
+    private void aplicarFundoDaFase() {
+        if (background1 == null) {
+            return;
+        }
+
+        String caminhoFundo = obterCaminhoFundoDaFase();
+
+        if (getClass().getResource(caminhoFundo) == null) {
+            System.out.println("Fundo da fase não encontrado: " + caminhoFundo);
+            return;
+        }
+
+        Image imagemFase = new Image(getClass().getResource(caminhoFundo).toExternalForm());
+
+        background1.setImage(imagemFase);
+        background1.setPreserveRatio(false);
+        background1.setSmooth(false);
+
+        System.out.println("Fundo carregado para fase " + faseAtual + ": " + caminhoFundo);
+    }
+
+    private String obterCaminhoFundoDaFase() {
+        switch (faseAtual) {
+            case 1:
+                return GameConfig.FUNDO_FASE_1;
+
+            case 2:
+                return GameConfig.FUNDO_FASE_2;
+
+            case 3:
+                return GameConfig.FUNDO_FASE_3;
+
+            case 4:
+                return GameConfig.FUNDO_FASE_4;
+
+            default:
+                return GameConfig.FUNDO_FASE_1;
+        }
+    }
+    
     private void organizarCamadasCenario() {
         if (background1 != null) {
             background1.toBack();
@@ -981,10 +1034,10 @@ public class GameplayController {
         if (rootPane == null || background1 == null) {
             return;
         }
-        
+
         double larguraTela = rootPane.getWidth();
         double alturaTela = rootPane.getHeight();
-        
+
         if (larguraTela <= 0) {
             larguraTela = LARGURA_PADRAO;
         }
@@ -992,28 +1045,29 @@ public class GameplayController {
         if (alturaTela <= 0) {
             alturaTela = ALTURA_PADRAO;
         }
-        
+
+        double larguraMundo = larguraTela + distanciaTotalFase;
+
         background1.setPreserveRatio(false);
-        background1.setFitWidth(larguraTela);
+        background1.setFitWidth(larguraMundo);
         background1.setFitHeight(alturaTela);
-        background1.setTranslateX(0);
         background1.setTranslateY(0);
-        
+
         if (ponteImg != null) {
             ponteImg.setVisible(false);
             ponteImg.setManaged(false);
         }
-        
+
         if (ponteHitbox != null) {
             double yChao = alturaTela * CHAO_RELATIVO_TELA;
-            
+
             ponteHitbox.setX(0);
             ponteHitbox.setY(yChao);
             ponteHitbox.setWidth(larguraTela);
             ponteHitbox.setHeight(4);
             ponteHitbox.setOpacity(0.0);
         }
-        
+
         atualizarCenarioPorScroll();
         reposicionarPlayerNoChao();
         organizarCamadasCenario();
@@ -1061,34 +1115,52 @@ public class GameplayController {
     }
     
     private void atualizarCenarioPorScroll() {
-        if (background1 == null) {
+        if (background1 == null || rootPane == null) {
             return;
         }
-        
-        background1.setTranslateX(0);
+
+        double larguraTela = rootPane.getWidth();
+
+        if (larguraTela <= 0) {
+            larguraTela = LARGURA_PADRAO;
+        }
+
+        double maxDeslocamento = Math.max(0, background1.getFitWidth() - larguraTela);
+        double deslocamento = Math.min(scrollFase, maxDeslocamento);
+
+        background1.setTranslateX(-deslocamento);
         background1.setTranslateY(0);
     }
     
     private void moverMundo(double scrollMundo) {
-        if (dragao != null) {
-            dragao.setTranslateX(dragao.getTranslateX() - scrollMundo);
+        moverNoMundo(dragao, scrollMundo);
+        moverNoMundo(morcego, scrollMundo);
+        moverNoMundo(vampiro, scrollMundo);
+
+        if (enemy4 != null) {
+            enemy4.moverNoMundo(scrollMundo);
+        } else {
+            moverNoMundo(sacerdote, scrollMundo);
         }
-        
-        if (morcego != null) {
-            morcego.setTranslateX(morcego.getTranslateX() - scrollMundo);
+
+        if (enemy5 != null) {
+            enemy5.moverNoMundo(scrollMundo);
+            enemy5.moverProjetisNoMundo(scrollMundo);
+        } else {
+            moverNoMundo(quimera, scrollMundo);
         }
-        
-        if (vampiro != null) {
-            vampiro.setTranslateX(vampiro.getTranslateX() - scrollMundo);
-        }
-        
+
         if (enemy1 != null) {
             enemy1.moverProjetisNoMundo(scrollMundo);
         }
-        
-        if (enemy5 != null) {
-            enemy5.moverProjetisNoMundo(scrollMundo);
+    }
+
+    private void moverNoMundo(Rectangle entidade, double scrollMundo) {
+        if (entidade == null) {
+            return;
         }
+
+        entidade.setTranslateX(entidade.getTranslateX() - scrollMundo);
     }
 //</editor-fold>
     

@@ -181,6 +181,19 @@ public class QuimeraController {
         }
     }
     
+    public void moverNoMundo(double scrollMundo) {
+        quimeraHitbox.setTranslateX(quimeraHitbox.getTranslateX() - scrollMundo);
+
+        pontoInicialX -= scrollMundo;
+        alvoX -= scrollMundo;
+
+        sincronizarVisualComHitbox();
+    }
+
+    public void redefinirPontoPatrulha() {
+        pontoInicialX = quimeraHitbox.getTranslateX();
+    }
+    
     public Rectangle getQuimera() {
         return quimeraHitbox;
     }
