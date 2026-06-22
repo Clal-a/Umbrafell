@@ -36,7 +36,7 @@ public class GameConfig {
     public static final int AUMENTO_QTD_INIMIGOS_POR_FASE = 2;
 
     // Dano base usado como referência para os inimigos
-    public static final int DANO_BASE_MORCEGO = 10;
+    public static final int DANO_BASE_MORCEGO = 0;
 
     // Multiplicadores de dano dos inimigos
     public static final double MULTIPLICADOR_DANO_MORCEGO = 1.00;

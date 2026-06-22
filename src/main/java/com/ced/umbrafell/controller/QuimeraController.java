@@ -1,9 +1,12 @@
 package com.ced.umbrafell.controller;
 
 import com.ced.umbrafell.model.Enemy;
+import com.ced.umbrafell.model.QuimeraEnemy;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -47,9 +50,7 @@ public class QuimeraController {
     public QuimeraController(Rectangle quimera) {
         this.quimeraHitbox = quimera;
         
-        this.enemyModel = new Enemy(
-            5, "Quimera", "Inimigo5", 200, 20, 100, 5, 500
-        );
+        this.enemyModel = new QuimeraEnemy();
         
         // Carrega a imagem do Boss
         img = new Image(getClass().getResource("/com/ced/umbrafell/BOSS.png").toExternalForm());

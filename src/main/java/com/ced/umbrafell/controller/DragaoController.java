@@ -1,9 +1,12 @@
 package com.ced.umbrafell.controller;
 
 import com.ced.umbrafell.model.Enemy;
+import com.ced.umbrafell.model.DragaoEnemy;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -40,9 +43,7 @@ public class DragaoController {
     public DragaoController(Rectangle dragao) {
         this.dragaoHitbox = dragao;
         
-        this.enemyModel = new Enemy(
-            1, "Dragão", "Inimigo1", 150, 20, 0, 5, 500
-        );
+        this.enemyModel = new DragaoEnemy();
         
         // Carrega as imagens normalmente
         upImg = new Image(getClass().getResource("/com/ced/umbrafell/enemy.png").toExternalForm());

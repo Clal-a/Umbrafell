@@ -1,7 +1,10 @@
 package com.ced.umbrafell.controller;
 
 import com.ced.umbrafell.model.Enemy;
+import com.ced.umbrafell.model.VampiroEnemy;
+
 import javafx.geometry.Rectangle2D;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -48,9 +51,7 @@ public class VampiroController {
     public VampiroController(Rectangle vampiro){
         this.vampiroHitbox = vampiro;
         
-        this.enemyModel = new Enemy(
-            3, "Vampiro", "Inimigo3", 100, 20, 0, 5, 500
-        );
+        this.enemyModel = new VampiroEnemy();
         
         // Carrega ambas as folhas de sprites
         walkSheet = new Image(getClass().getResource("/com/ced/umbrafell/vampire(Walking).png").toExternalForm());

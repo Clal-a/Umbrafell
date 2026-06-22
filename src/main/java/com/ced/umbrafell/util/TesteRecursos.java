@@ -26,6 +26,7 @@ public class TesteRecursos {
         testar("/com/ced/umbrafell/fase3.png");
         testar("/com/ced/umbrafell/fase4.png");
 
+        testar("/com/ced/umbrafell/final.fxml");
         testar("/com/ced/umbrafell/final_bom.png");
         testar("/com/ced/umbrafell/final_ruim.png");
 

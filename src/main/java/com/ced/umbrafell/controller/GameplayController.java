@@ -675,7 +675,12 @@ public class GameplayController {
         }
         
         int defesa = playerModel.getDefesa();
-        int danoFinal = Math.max(1, danoBase - defesa);
+        int danoFinal = Math.max(0, danoBase - defesa);
+        
+        if (danoFinal <= 0) {
+            System.out.println(origem + " tentou causar dano, mas o dano final foi 0.");
+            return;
+        }
         
         playerModel.setVidaAtual(playerModel.getVidaAtual() - danoFinal);
         
@@ -707,14 +712,15 @@ public class GameplayController {
         if (jogadorDerrotado) {
             return;
         }
-        
+
         jogadorDerrotado = true;
         faseConcluida = true;
-        
+
         System.out.println("Jogador derrotado!");
-        
+
         pausarLoopEInputs();
         salvarProgressoJogador();
+
         finalizarRun("DERROTA");
     }
 //</editor-fold>
@@ -1252,12 +1258,16 @@ public class GameplayController {
         System.out.println("Joias obtidas: " + joiasRun);
         System.out.println("Fase alcançada: " + faseAtual);
         System.out.println("Inimigos derrotados: " + inimigosDerrotadosTotal);
-        
+
         pausarLoopEInputs();
-        
+
         salvarRunNoBanco(resultado);
-        
-        Platform.runLater(() -> SceneManeger.abrirRanking());
+
+        boolean vitoria = "VITORIA".equals(resultado);
+
+        Platform.runLater(() -> {
+            SceneManeger.abrirTelaFinal(vitoria, playerModel);
+        });
     }
     
     

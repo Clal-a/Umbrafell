@@ -1,7 +1,10 @@
 package com.ced.umbrafell.controller;
 
 import com.ced.umbrafell.model.Enemy;
+import com.ced.umbrafell.model.SacerdoteEnemy;
+
 import javafx.geometry.Rectangle2D;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -48,9 +51,7 @@ public class SacerdoteController {
     public SacerdoteController(Rectangle sacerdote){
         this.sacerdoteHitbox = sacerdote;
         
-        this.enemyModel = new Enemy(
-            4, "Sacerdote", "Inimigo4", 150, 20, 0, 5, 500
-        );
+        this.enemyModel = new SacerdoteEnemy();
         
         // Carrega as folhas de sprites correspondentes ao Sacerdote
         walkSheet = new Image(getClass().getResource("/com/ced/umbrafell/sacerdote(Walking).png").toExternalForm());

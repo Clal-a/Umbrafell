@@ -129,3 +129,16 @@
 .table-row-cell:selected {
     -fx-background-color: #6d1f2f;
 }
+
+.titulo-final {
+    -fx-font-size: 42px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f4d99a;
+    -fx-effect: dropshadow(gaussian, rgba(120,20,35,0.85), 18, 0.6, 0, 0);
+}
+
+.subtitulo-final {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e8d8c2;
+}
