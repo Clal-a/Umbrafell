@@ -20,8 +20,7 @@ public class SceneManeger {
     public static void inicializar(Stage stage) {
         stagePrincipal = stage;
         stagePrincipal.setTitle("Umbrafell");
-        stagePrincipal.setMinWidth(900);
-        stagePrincipal.setMinHeight(600);
+        stagePrincipal.setResizable(false);
     }
 
     public static void abrirMenu() {
@@ -55,7 +54,12 @@ public class SceneManeger {
 
             stagePrincipal.setTitle("Umbrafell - Gameplay");
             stagePrincipal.setScene(scene);
-            stagePrincipal.setMaximized(true);
+
+            stagePrincipal.setMaximized(false);
+            stagePrincipal.setResizable(false);
+            stagePrincipal.sizeToScene();
+            stagePrincipal.centerOnScreen();
+
             stagePrincipal.show();
 
         } catch (IOException e) {

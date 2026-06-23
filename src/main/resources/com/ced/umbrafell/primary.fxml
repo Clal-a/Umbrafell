@@ -63,6 +63,14 @@
                    height="100.0"
                    translateX="500.0"
                    translateY="100.0" />
+        
+        <Rectangle fx:id="vampiro"
+           width="100.0"
+           height="150.0"
+           translateX="1200.0"
+           translateY="300.0"
+           fill="TRANSPARENT"
+           stroke="TRANSPARENT" />
 
         <Rectangle fx:id="jogador"
                    fill="WHITE"

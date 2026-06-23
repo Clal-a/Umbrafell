@@ -1,8 +1,11 @@
 package com.ced.umbrafell.controller;
 
 import com.ced.umbrafell.model.Enemy;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
+
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.ImagePattern;
@@ -24,6 +27,10 @@ public class DragaoController {
     private List<Projectile> projectiles = new ArrayList<>();
     
     private double speed = 0;
+    
+    private double animationTimer = 0;
+    private final double frameDuration = 0.35;
+    private int animState = 0;
     
     public DragaoController(Rectangle dragao){
         this.dragao = dragao;
@@ -144,6 +151,10 @@ public class DragaoController {
         }
     }
     
+    public List<Projectile> getProjectiles() {
+        return Collections.unmodifiableList(projectiles);
+    }
+
     public void moverProjetisNoMundo(double scrollMundo) {
         for (Projectile p : projectiles) {
             p.getRect().setTranslateX(p.getRect().getTranslateX() - scrollMundo);
