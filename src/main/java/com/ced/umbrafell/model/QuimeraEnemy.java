@@ -12,7 +12,7 @@ public class QuimeraEnemy extends Enemy {
                     3,
                     "Quimera",
                     "QUIMERA",
-                    GameConfig.VIDA_DRAGAO,
+                    GameConfig.VIDA_QUIMERA,
                     calcularDano(),
                     GameConfig.VELOCIDADE_DRAGAO,
                     GameConfig.RECOMPENSA_BASE_JOIAS * 3,

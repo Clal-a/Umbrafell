@@ -11,7 +11,17 @@ public class GameConfig {
     }
 
     // Quantidade total de fases normais antes/final
-    public static final int TOTAL_FASES = 5;
+    public static final int TOTAL_FASES = 4;
+    
+    // Fundos das fases
+    public static final String FUNDO_FASE_1 = "/com/ced/umbrafell/fase1.png";
+    public static final String FUNDO_FASE_2 = "/com/ced/umbrafell/fase2.png";
+    public static final String FUNDO_FASE_3 = "/com/ced/umbrafell/fase3.png";
+    public static final String FUNDO_FASE_4 = "/com/ced/umbrafell/fase4.png";
+
+    // Telas finais
+    public static final String FUNDO_FINAL_BOM = "/com/ced/umbrafell/final_bom.png";
+    public static final String FUNDO_FINAL_RUIM = "/com/ced/umbrafell/final_ruim.png";
 
     // Ataque secundário à distância: 10 segundos
     public static final long COOLDOWN_ATAQUE_SECUNDARIO_MS = 10000;
@@ -26,7 +36,7 @@ public class GameConfig {
     public static final int AUMENTO_QTD_INIMIGOS_POR_FASE = 2;
 
     // Dano base usado como referência para os inimigos
-    public static final int DANO_BASE_MORCEGO = 10;
+    public static final int DANO_BASE_MORCEGO = 0;
 
     // Multiplicadores de dano dos inimigos
     public static final double MULTIPLICADOR_DANO_MORCEGO = 1.00;
@@ -41,7 +51,7 @@ public class GameConfig {
     public static final int VIDA_VAMPIRO = 30;
     public static final int VIDA_DRAGAO = 40;
     public static final int VIDA_SACERDOTE = 50;
-    public static final int VIDA_DRACULA = 200;
+    public static final int VIDA_QUIMERA = 200;
 
     // Velocidades recomendadas
     public static final double VELOCIDADE_PLAYER = 260;

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane fx:id="root"
+           prefWidth="1280.0"
+           prefHeight="720.0"
+           xmlns="http://javafx.com/javafx/13"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.ced.umbrafell.controller.FinalController">
+
+    <children>
+
+        <ImageView fx:id="imgFundo"
+                   fitWidth="1280.0"
+                   fitHeight="720.0"
+                   preserveRatio="false" />
+
+        <VBox fx:id="painelFinal"
+              alignment="CENTER"
+              spacing="24.0"
+              maxWidth="950.0"
+              style="-fx-background-color: transparent;">
+
+            <children>
+
+                <Label fx:id="lblTitulo"
+                       text="Título final"
+                       wrapText="true"
+                       textAlignment="CENTER"
+                       styleClass="titulo-final" />
+
+                <Label fx:id="lblSubtitulo"
+                       text="Subtítulo final"
+                       wrapText="true"
+                       textAlignment="CENTER"
+                       styleClass="subtitulo-final" />
+
+                <HBox alignment="CENTER"
+                      spacing="20.0">
+
+                    <children>
+                        <Button fx:id="btnSim"
+                                text="Sim"
+                                onAction="#onSim"
+                                styleClass="botao-principal" />
+
+                        <Button fx:id="btnNao"
+                                text="Não"
+                                onAction="#onNao"
+                                styleClass="botao-principal" />
+                    </children>
+
+                </HBox>
+
+            </children>
+
+        </VBox>
+
+    </children>
+
+</StackPane>

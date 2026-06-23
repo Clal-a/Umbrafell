@@ -1,9 +1,12 @@
 package com.ced.umbrafell.util;
 
 import com.ced.umbrafell.controller.GameplayController;
+import com.ced.umbrafell.controller.FinalController;
 import com.ced.umbrafell.model.Player;
+
 import java.io.IOException;
 import java.net.URL;
+
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -53,6 +56,35 @@ public class SceneManeger {
             controller.startGame(scene);
 
             stagePrincipal.setTitle("Umbrafell - Gameplay");
+            stagePrincipal.setScene(scene);
+
+            stagePrincipal.setMaximized(false);
+            stagePrincipal.setResizable(false);
+            stagePrincipal.sizeToScene();
+            stagePrincipal.centerOnScreen();
+
+            stagePrincipal.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void abrirTelaFinal(boolean vitoria, Player player) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    SceneManeger.class.getResource("/com/ced/umbrafell/final.fxml")
+            );
+
+            Parent root = loader.load();
+
+            FinalController controller = loader.getController();
+            controller.setDados(vitoria, player);
+
+            Scene scene = new Scene(root, 1280, 720);
+            aplicarCss(scene);
+
+            stagePrincipal.setTitle(vitoria ? "Umbrafell - Vitória" : "Umbrafell - Derrota");
             stagePrincipal.setScene(scene);
 
             stagePrincipal.setMaximized(false);

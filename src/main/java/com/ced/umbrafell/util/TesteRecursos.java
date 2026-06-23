@@ -20,6 +20,15 @@ public class TesteRecursos {
         testar("/com/ced/umbrafell/Background1.png");
         testar("/com/ced/umbrafell/ponte.png");
         testar("/com/ced/umbrafell/ponte_sem_fundo.png");
+        
+        testar("/com/ced/umbrafell/fase1.png");
+        testar("/com/ced/umbrafell/fase2.png");
+        testar("/com/ced/umbrafell/fase3.png");
+        testar("/com/ced/umbrafell/fase4.png");
+
+        testar("/com/ced/umbrafell/final.fxml");
+        testar("/com/ced/umbrafell/final_bom.png");
+        testar("/com/ced/umbrafell/final_ruim.png");
 
         testar("/com/ced/umbrafell/inventario.fxml");
         testar("/com/ced/umbrafell/resultado.fxml");

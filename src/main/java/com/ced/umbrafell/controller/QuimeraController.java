@@ -1,9 +1,12 @@
 package com.ced.umbrafell.controller;
 
 import com.ced.umbrafell.model.Enemy;
+import com.ced.umbrafell.model.QuimeraEnemy;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -47,9 +50,7 @@ public class QuimeraController {
     public QuimeraController(Rectangle quimera) {
         this.quimeraHitbox = quimera;
         
-        this.enemyModel = new Enemy(
-            5, "Quimera", "Inimigo5", 200, 20, 100, 5, 500
-        );
+        this.enemyModel = new QuimeraEnemy();
         
         // Carrega a imagem do Boss
         img = new Image(getClass().getResource("/com/ced/umbrafell/BOSS.png").toExternalForm());
@@ -179,6 +180,19 @@ public class QuimeraController {
         for (Projectile p : projectiles) {
             p.getRect().setTranslateX(p.getRect().getTranslateX() - scrollMundo);
         }
+    }
+    
+    public void moverNoMundo(double scrollMundo) {
+        quimeraHitbox.setTranslateX(quimeraHitbox.getTranslateX() - scrollMundo);
+
+        pontoInicialX -= scrollMundo;
+        alvoX -= scrollMundo;
+
+        sincronizarVisualComHitbox();
+    }
+
+    public void redefinirPontoPatrulha() {
+        pontoInicialX = quimeraHitbox.getTranslateX();
     }
     
     public Rectangle getQuimera() {
