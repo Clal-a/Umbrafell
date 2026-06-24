@@ -11,6 +11,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.application.Platform;
 
 /**
  *
@@ -32,15 +33,15 @@ public class SceneManeger {
     }
 
     public static void abrirMenu() {
-        carregarCena("/com/ced/umbrafell/menu.fxml", "Umbrafell - Menu", true);
+        carregarCena("/com/ced/umbrafell/menu.fxml", "Umbrafell - Menu", false);
     }
 
     public static void abrirCreditos() {
-        carregarCena("/com/ced/umbrafell/creditos.fxml", "Umbrafell - Créditos", true);
+        carregarCena("/com/ced/umbrafell/creditos.fxml", "Umbrafell - Créditos", false);
     }
 
     public static void abrirRanking() {
-        carregarCena("/com/ced/umbrafell/ranking.fxml", "Umbrafell - Ranking", true);
+        carregarCena("/com/ced/umbrafell/ranking.fxml", "Umbrafell - Ranking", false);
     }
 
     public static void abrirGameplay(Player player) {
@@ -60,15 +61,7 @@ public class SceneManeger {
             controller.setPlayerModel(jogadorAtual);
             controller.startGame(scene);
 
-            stagePrincipal.setTitle("Umbrafell - Gameplay");
-            stagePrincipal.setScene(scene);
-
-            stagePrincipal.setMaximized(false);
-            stagePrincipal.setResizable(false);
-            stagePrincipal.sizeToScene();
-            stagePrincipal.centerOnScreen();
-
-            stagePrincipal.show();
+            aplicarCenaPadrao("Umbrafell - Gameplay", scene);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -89,15 +82,10 @@ public class SceneManeger {
             Scene scene = new Scene(root, 1280, 720);
             aplicarCss(scene);
 
-            stagePrincipal.setTitle(vitoria ? "Umbrafell - Vitória" : "Umbrafell - Derrota");
-            stagePrincipal.setScene(scene);
-
-            stagePrincipal.setMaximized(false);
-            stagePrincipal.setResizable(false);
-            stagePrincipal.sizeToScene();
-            stagePrincipal.centerOnScreen();
-
-            stagePrincipal.show();
+            aplicarCenaPadrao(
+                    vitoria ? "Umbrafell - Vitória" : "Umbrafell - Derrota",
+                    scene
+            );
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -129,14 +117,36 @@ public class SceneManeger {
             Scene scene = new Scene(root, 1280, 720);
             aplicarCss(scene);
 
-            stagePrincipal.setTitle(titulo);
-            stagePrincipal.setScene(scene);
-            stagePrincipal.setMaximized(maximizar);
-            stagePrincipal.show();
+            aplicarCenaPadrao(titulo, scene);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    private static void aplicarCenaPadrao(String titulo, Scene scene) {
+        if (stagePrincipal == null) {
+            return;
+        }
+
+        stagePrincipal.setFullScreen(false);
+        stagePrincipal.setMaximized(false);
+        stagePrincipal.setResizable(false);
+
+        stagePrincipal.setTitle(titulo);
+        stagePrincipal.setScene(scene);
+
+        stagePrincipal.sizeToScene();
+        stagePrincipal.centerOnScreen();
+        stagePrincipal.show();
+
+        Platform.runLater(() -> {
+            stagePrincipal.setFullScreen(false);
+            stagePrincipal.setMaximized(false);
+            stagePrincipal.setResizable(false);
+            stagePrincipal.sizeToScene();
+            stagePrincipal.centerOnScreen();
+        });
     }
 
     private static void aplicarCss(Scene scene) {
@@ -148,4 +158,6 @@ public class SceneManeger {
             System.out.println("CSS não encontrado: /com/ced/umbrafell/umbrafell.css");
         }
     }
+    
+    
 }

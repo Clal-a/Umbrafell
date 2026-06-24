@@ -37,7 +37,7 @@
         <Label text="Disciplina"
                styleClass="subtitulo"/>
 
-        <Label text="Técnicas de Linguagem de Programação II"
+        <Label text="Tópicos de Linguagem de Programação II"
                wrapText="true"
                styleClass="texto-secundario"/>
 

@@ -85,8 +85,8 @@ public class GameplayController {
     Constantes próprias da tela/câmera.
     Regras gerais do jogo ficam no GameConfig.
     */
-    private static final double LARGURA_PADRAO = 640;
-    private static final double ALTURA_PADRAO = 400;
+    private static final double LARGURA_PADRAO = 1280;
+    private static final double ALTURA_PADRAO = 720;    
 
     private static final double DISTANCIA_BASE_FASE = 2400;
     private static final double AUMENTO_DISTANCIA_POR_FASE = 450;
@@ -97,7 +97,8 @@ public class GameplayController {
     private static final double CHAO_RELATIVO_TELA = 0.90;
     private static final double DELTA_MAXIMO = 0.05;
     private static final double TEMPO_INVULNERAVEL_APOS_DANO = 1.0;
-
+    private static final double CHAO_PADRAO = 670;
+    private static final double ALTURA_HITBOX_CHAO = 2;
     /*
     Loop e entrada.
     */
@@ -157,6 +158,15 @@ public class GameplayController {
         configurarArmaPrincipal();
         configurarCenarioFase();
         
+        colocarNoChao(jogador);
+        colocarNoChao(vampiro);
+        colocarNoChao(sacerdote);
+        colocarNoChao(quimera);
+
+        if (player != null) {
+            player.setLimiteChao(getChaoY());
+        }
+
         iniciarFase();
         criarLoopJogo();
         
@@ -223,8 +233,6 @@ public class GameplayController {
         player.getPersonImg().toFront();
         player.getWeaponRect().toFront();
         
-        player.getWeaponRect().setStroke(Color.BLACK);
-        player.getWeaponRect().setStrokeWidth(3);
     }
     
     private void aplicarAtributosDoPlayerNoControle() {
@@ -241,7 +249,7 @@ public class GameplayController {
     
     private void atualizarPlayer(double delta) {
         if (ponteHitbox != null) {
-            player.setLimiteChao(ponteHitbox.getY());
+            player.setLimiteChao(getChaoY());
         }
 
         // 1. Atualiza a física, inputs E roda a nossa nova lógica de animação
@@ -255,24 +263,22 @@ public class GameplayController {
     
     private void posicionarJogadorInicioFase() {
         jogador.setTranslateX(LIMITE_ESQUERDO_CAMERA);
-        
-        if (ponteHitbox != null) {
-            jogador.setTranslateY(ponteHitbox.getY() - jogador.getHeight());
+        colocarNoChao(jogador);
+
+        if (player != null) {
+            player.setLimiteChao(getChaoY());
+            player.sincronizarVisualComHitbox();
         }
-        
-        player.sincronizarVisualComHitbox();
     }
     
     private void reposicionarPlayerNoChao() {
-        if (jogador == null || ponteHitbox == null || player == null) {
+        if (jogador == null || player == null) {
             return;
         }
-        
-        double novoY = ponteHitbox.getY() - jogador.getHeight();
-        
-        jogador.setTranslateY(novoY);
-        
-        player.setLimiteChao(ponteHitbox.getY());
+
+        colocarNoChao(jogador);
+
+        player.setLimiteChao(getChaoY());
         player.sincronizarVisualComHitbox();
     }
 //</editor-fold>
@@ -422,57 +428,70 @@ public class GameplayController {
         }
     }
     
-    private void respawnarInimigosBasicos() {
-        double chao = ponteHitbox != null ? ponteHitbox.getY() : 300;
-        
+   private void respawnarInimigosBasicos() {
+        double chao = getChaoY();
+
         if (dragao != null) {
             dragao.setVisible(true);
             dragao.setTranslateX(900 + (faseAtual * 180));
-            dragao.setTranslateY(chao - dragao.getHeight());
-            
-            if (enemy1 != null && enemy1.getEnemyModel() != null) {
-                enemy1.getEnemyModel().restaurarVida();
+            colocarNoChao(dragao);
+
+            if (enemy1 != null) {
+                enemy1.sincronizarVisualComHitbox();
+
+                if (enemy1.getEnemyModel() != null) {
+                    enemy1.getEnemyModel().restaurarVida();
+                }
             }
         }
-        
+
         if (morcego != null) {
             morcego.setVisible(true);
             morcego.setTranslateX(600 + (faseAtual * 140));
             morcego.setTranslateY(chao - morcego.getHeight() - 140);
-            
+
             if (enemy2 != null && enemy2.getEnemyModel() != null) {
                 enemy2.getEnemyModel().restaurarVida();
             }
         }
-        
+
         if (vampiro != null) {
             vampiro.setVisible(true);
             vampiro.setTranslateX(1200 + (faseAtual * 160));
-            vampiro.setTranslateY(chao - vampiro.getHeight());
-            
-            if (enemy3 != null && enemy3.getEnemyModel() != null) {
-                enemy3.getEnemyModel().restaurarVida();
-            }
-        }
-        
-        if (sacerdote != null) {
-                sacerdote.setVisible(true);
-                sacerdote.setTranslateX(1200 + (faseAtual * 180));
-                sacerdote.setTranslateY(chao - sacerdote.getHeight());
+            colocarNoChao(vampiro);
 
-                if (enemy4 != null && enemy4.getEnemyModel() != null) {
-                    enemy4.getEnemyModel().restaurarVida();
-                    enemy4.redefinirPontoPatrulha();
+            if (enemy3 != null) {
+                enemy3.sincronizarVisualComHitbox();
+
+                if (enemy3.getEnemyModel() != null) {
+                    enemy3.getEnemyModel().restaurarVida();
                 }
             }
-        
+        }
+
+        if (sacerdote != null) {
+            sacerdote.setVisible(true);
+            sacerdote.setTranslateX(1200 + (faseAtual * 180));
+            colocarNoChao(sacerdote);
+
+            if (enemy4 != null) {
+                enemy4.sincronizarVisualComHitbox();
+                enemy4.redefinirPontoPatrulha();
+
+                if (enemy4.getEnemyModel() != null) {
+                    enemy4.getEnemyModel().restaurarVida();
+                }
+            }
+        }
+
         if (quimera != null) {
             if (faseAtual >= 4) {
                 quimera.setVisible(true);
                 quimera.setTranslateX(1200 + (faseAtual * 160));
-                quimera.setTranslateY(chao - quimera.getHeight());
+                colocarNoChao(quimera);
 
                 if (enemy5 != null) {
+                    enemy5.sincronizarVisualComHitbox();
                     enemy5.redefinirPontoPatrulha();
 
                     if (enemy5.getEnemyModel() != null) {
@@ -481,6 +500,10 @@ public class GameplayController {
                 }
             } else {
                 quimera.setVisible(false);
+
+                if (enemy5 != null) {
+                    enemy5.sincronizarVisualComHitbox();
+                }
             }
         }
     }
@@ -864,7 +887,7 @@ public class GameplayController {
     
     //<editor-fold defaultstate="collapsed" desc="MOEDAS E RECOMPENSAS VISUAIS">
     private void updateMoedas(double delta) {
-        double chao = ponteHitbox != null ? ponteHitbox.getY() : 900;
+        double chao = getChaoY();
         
          for (Moeda moeda : moedas) {
             moeda.update(delta, jogador, playerModel, chao);
@@ -902,10 +925,14 @@ public class GameplayController {
 
         aplicarFundoDaFase();
 
+        reajustarTamanhoCenario();
+
         posicionarJogadorInicioFase();
         respawnarInimigosBasicos();
 
-        reajustarTamanhoCenario();
+        organizarCamadasCenario();
+        atualizarBarraDeVida();
+        
         atualizarCenarioPorScroll();
 
         System.out.println("Distância da fase: " + distanciaTotalFase);
@@ -995,32 +1022,22 @@ public class GameplayController {
             System.out.println("Background ou rootPane não foi injetado pelo FXML.");
             return;
         }
-        
+
+        rootPane.setPrefSize(LARGURA_PADRAO, ALTURA_PADRAO);
+        rootPane.setMinSize(LARGURA_PADRAO, ALTURA_PADRAO);
+        rootPane.setMaxSize(LARGURA_PADRAO, ALTURA_PADRAO);
+
         background1.setPreserveRatio(false);
-        
+
         if (ponteImg != null) {
             ponteImg.setVisible(false);
             ponteImg.setManaged(false);
         }
-        
-        rootPane.widthProperty().addListener((obs, antigo, novo) -> {
-            Platform.runLater(() -> {
-                reajustarTamanhoCenario();
-                reposicionarPlayerNoChao();
-            });
-        });
-        
-        rootPane.heightProperty().addListener((obs, antigo, novo) -> {
-            Platform.runLater(() -> {
-                reajustarTamanhoCenario();
-                reposicionarPlayerNoChao();
-            });
-        });
-        
-        organizarCamadasCenario();
+
         reajustarTamanhoCenario();
+        organizarCamadasCenario();
     }
-    
+
     private void aplicarFundoDaFase() {
         if (background1 == null) {
             return;
@@ -1097,16 +1114,12 @@ public class GameplayController {
             return;
         }
 
-        double larguraTela = rootPane.getWidth();
-        double alturaTela = rootPane.getHeight();
+        double larguraTela = LARGURA_PADRAO;
+        double alturaTela = ALTURA_PADRAO;
 
-        if (larguraTela <= 0) {
-            larguraTela = LARGURA_PADRAO;
-        }
-
-        if (alturaTela <= 0) {
-            alturaTela = ALTURA_PADRAO;
-        }
+        rootPane.setPrefSize(larguraTela, alturaTela);
+        rootPane.setMinSize(larguraTela, alturaTela);
+        rootPane.setMaxSize(larguraTela, alturaTela);
 
         double larguraMundo = larguraTela + distanciaTotalFase;
 
@@ -1121,17 +1134,14 @@ public class GameplayController {
         }
 
         if (ponteHitbox != null) {
-            double yChao = alturaTela * CHAO_RELATIVO_TELA;
-
             ponteHitbox.setX(0);
-            ponteHitbox.setY(yChao);
+            ponteHitbox.setY(CHAO_PADRAO);
             ponteHitbox.setWidth(larguraTela);
-            ponteHitbox.setHeight(4);
+            ponteHitbox.setHeight(ALTURA_HITBOX_CHAO);
             ponteHitbox.setOpacity(0.0);
         }
 
         atualizarCenarioPorScroll();
-        reposicionarPlayerNoChao();
         organizarCamadasCenario();
     }
     
@@ -1223,6 +1233,18 @@ public class GameplayController {
         }
 
         entidade.setTranslateX(entidade.getTranslateX() - scrollMundo);
+    }
+    
+    private double getChaoY() {
+        return CHAO_PADRAO;
+    }
+    
+    private void colocarNoChao(Rectangle personagem) {
+        if (personagem == null) {
+            return;
+        }
+
+        personagem.setTranslateY(getChaoY() - personagem.getHeight());
     }
 //</editor-fold>
     
