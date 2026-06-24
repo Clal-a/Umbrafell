@@ -12,6 +12,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
+
 public class SceneManeger {
 
     private static Stage stagePrincipal;

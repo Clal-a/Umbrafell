@@ -1,5 +1,9 @@
 package com.ced.umbrafell.model;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 import com.ced.umbrafell.util.GameConfig;
 
 /**

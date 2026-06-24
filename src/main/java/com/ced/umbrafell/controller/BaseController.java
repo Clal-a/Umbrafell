@@ -3,18 +3,27 @@ package com.ced.umbrafell.controller;
 import com.ced.umbrafell.dao.PlayerDAO;
 import com.ced.umbrafell.dao.TalismanDAO;
 import com.ced.umbrafell.dao.UpgradeDAO;
+
 import com.ced.umbrafell.model.Player;
 import com.ced.umbrafell.model.Talisman;
 import com.ced.umbrafell.model.Upgrade;
+
+import com.ced.umbrafell.util.AlertUtil;
+
 import java.util.List;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class BaseController {
 
     @FXML
@@ -254,7 +263,7 @@ public class BaseController {
             boolean comprou = upgradeDAO.comprarOuMelhorar(player.getId(), upgradeSelecionado.getId());
 
             if (!comprou) {
-                lblMensagem.setText("Não foi possível comprar: joias insuficientes ou nível máximo.");
+                AlertUtil.erro("Joias insuficientes", "Você não possui Joias Sombrias suficientes.");
                 return;
             }
 
@@ -262,7 +271,7 @@ public class BaseController {
             carregarDadosTela();
             carregarCardsUpgrades();
 
-            lblDetalheTitulo.setText("Upgrade adquirido!");
+            AlertUtil.info("Upgrade comprado", "Upgrade aplicado com sucesso.");
             lblDetalheTexto.setText("Você melhorou: " + upgradeSelecionado.getNome());
 
             lblMensagem.setText("Upgrade comprado/melhorado: " + upgradeSelecionado.getNome());

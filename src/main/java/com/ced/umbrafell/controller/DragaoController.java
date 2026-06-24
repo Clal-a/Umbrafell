@@ -13,6 +13,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class DragaoController {
 
     private Enemy enemyModel;
@@ -170,7 +174,7 @@ public class DragaoController {
 
     public void moverProjetisNoMundo(double scrollMundo) {
         for (Projectile p : projectiles) {
-            p.getRect().setTranslateX(p.getRect().getTranslateX() - scrollMundo);
+            p.moverNoMundo(scrollMundo);
         }
     }
 

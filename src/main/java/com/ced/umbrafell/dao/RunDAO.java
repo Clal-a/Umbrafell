@@ -8,6 +8,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class RunDAO {
 
     public Run salvar(Run run) {

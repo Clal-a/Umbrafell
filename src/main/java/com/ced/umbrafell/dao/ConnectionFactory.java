@@ -4,6 +4,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class ConnectionFactory {
 
     private static final String URL = "jdbc:postgresql://localhost:5432/umbrafell";

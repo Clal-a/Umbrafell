@@ -2,11 +2,19 @@ package com.ced.umbrafell.controller;
 
 import com.ced.umbrafell.dao.PlayerDAO;
 import com.ced.umbrafell.model.Player;
+
 import com.ced.umbrafell.util.SceneManeger;
+import com.ced.umbrafell.util.AlertUtil;
+
 import javafx.fxml.FXML;
+
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class MenuController {
 
     @FXML
@@ -22,7 +30,7 @@ public class MenuController {
         String nome = txtNome.getText();
 
         if (nome == null || nome.trim().isEmpty()) {
-            lblMensagem.setText("Digite o nome do jogador.");
+            AlertUtil.erro("Nome inválido", "Informe o nome do jogador para iniciar.");
             return;
         }
 

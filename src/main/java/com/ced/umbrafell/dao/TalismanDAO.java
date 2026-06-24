@@ -1,6 +1,8 @@
 package com.ced.umbrafell.dao;
 
 import com.ced.umbrafell.model.Talisman;
+import com.ced.umbrafell.model.InventarioItem;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,6 +10,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class TalismanDAO {
 
     public List<Talisman> listarTodos() {
@@ -310,6 +316,46 @@ public class TalismanDAO {
             stmt.setInt(2, idTalisma);
 
             stmt.executeUpdate();
+        }
+    }
+    
+    public List<InventarioItem> listarInventarioDoJogador(int idJogador) {
+        String sql =
+                "SELECT " +
+                "i.nome, " +
+                "i.tipo, " +
+                "i.descricao " +
+                "FROM jogador_talismas jt " +
+                "JOIN talismas t ON t.id_talisma = jt.id_talisma " +
+                "JOIN itens i ON i.id_item = t.id_item " +
+                "WHERE jt.id_jogador = ? " +
+                "ORDER BY i.nome";
+
+        List<InventarioItem> itens = new ArrayList<>();
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setInt(1, idJogador);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                itens.add(
+                        new InventarioItem(
+                                "✦",
+                                rs.getString("nome"),
+                                rs.getString("descricao"),
+                                rs.getString("tipo"),
+                                1
+                        )
+                );
+            }
+
+            return itens;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar inventário do jogador: " + e.getMessage(), e);
         }
     }
 }

@@ -7,18 +7,18 @@ import com.ced.umbrafell.util.GameConfig;
  * @authors Cesar & Danilo
  */
 public class QuimeraEnemy extends Enemy {
+    
     public QuimeraEnemy() {
-            super(
-                    3,
-                    "Quimera",
-                    "QUIMERA",
-                    GameConfig.VIDA_QUIMERA,
-                    calcularDano(),
-                    GameConfig.VELOCIDADE_DRAGAO,
-                    GameConfig.RECOMPENSA_BASE_JOIAS * 3,
-                    300
-            );
-
+        super(
+                7,
+                "Quimera",
+                "QUIMERA",
+                GameConfig.VIDA_QUIMERA,
+                calcularDano(),
+                GameConfig.VELOCIDADE_QUIMERA,
+                GameConfig.RECOMPENSA_BASE_JOIAS * 5,
+                600
+        );
     }
 
     public QuimeraEnemy(
@@ -36,7 +36,7 @@ public class QuimeraEnemy extends Enemy {
     
     private static int calcularDano() {
         return (int) Math.ceil(
-                GameConfig.DANO_BASE_MORCEGO * GameConfig.MULTIPLICADOR_DANO_DRAGAO
+                GameConfig.DANO_BASE_MORCEGO * GameConfig.MULTIPLICADOR_DANO_QUIMERA
         );
     }
 }

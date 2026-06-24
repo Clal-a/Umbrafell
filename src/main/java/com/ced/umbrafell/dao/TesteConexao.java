@@ -3,6 +3,10 @@ package com.ced.umbrafell.dao;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class TesteConexao {
 
     public static void main(String[] args) {

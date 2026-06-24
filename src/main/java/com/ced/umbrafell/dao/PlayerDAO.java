@@ -6,6 +6,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class PlayerDAO {
 
     public Player cadastrar(Player player) {

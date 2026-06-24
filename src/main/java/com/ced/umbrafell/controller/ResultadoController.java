@@ -5,6 +5,10 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class ResultadoController {
 
     @FXML

@@ -25,7 +25,7 @@ public class Player {
     public Player() {
         this.vidaMaxima = 100;
         this.vidaAtual = 100;
-        this.dano = 50;
+        this.dano = 10;
         this.defesa = 0;
         this.velocidade = 1.00;
         this.ataquePrincipalNivel = 1;

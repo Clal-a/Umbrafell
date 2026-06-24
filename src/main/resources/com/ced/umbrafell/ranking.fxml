@@ -78,6 +78,10 @@
             <Button text="Voltar"
                     onAction="#onVoltar"
                     styleClass="botao-menu"/>
+            
+            <Button text="Exportar"
+                    onAction="#onExportarTxt"
+                    styleClass="botao-menu"/>
         </HBox>
 
     </VBox>

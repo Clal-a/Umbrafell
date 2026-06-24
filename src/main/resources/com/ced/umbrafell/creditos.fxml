@@ -33,6 +33,13 @@
 
         <Label text="Cesar e Danilo"
                styleClass="texto-destaque"/>
+        
+        <Label text="Disciplina"
+               styleClass="subtitulo"/>
+
+        <Label text="Técnicas de Linguagem de Programação II"
+               wrapText="true"
+               styleClass="texto-secundario"/>
 
         <Label text="Tecnologias utilizadas"
                styleClass="subtitulo"/>

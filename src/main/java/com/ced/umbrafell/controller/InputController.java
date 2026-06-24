@@ -101,7 +101,6 @@ public class InputController {
     } 
     
     public void resetarTeclas() {
-        c = false;
         up = false;
         down = false;
         left = false;

@@ -100,6 +100,24 @@
                    height="150.0"
                    translateX="120.0"
                    translateY="193.0" />
+        
+        <Rectangle fx:id="vidaBackground"
+           x="20.0"
+           y="20.0"
+           width="200.0"
+           height="20.0"
+           fill="GRAY"
+           stroke="BLACK"
+           strokeWidth="2"/>
+
+        <Rectangle fx:id="vidaBar"
+                   x="20.0"
+                   y="20.0"
+                   width="200.0"
+                   height="20.0"
+                   fill="GREEN"
+                   stroke="BLACK"
+                   strokeWidth="2"/>
 
     </children>
 

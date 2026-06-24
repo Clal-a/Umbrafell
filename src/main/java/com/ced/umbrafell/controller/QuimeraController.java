@@ -14,7 +14,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 /**
- * @author aluno
+ *
+ * @author Cesar e Danilo
  */
 public class QuimeraController {
     private Enemy enemyModel;
@@ -178,7 +179,7 @@ public class QuimeraController {
 
     public void moverProjetisNoMundo(double scrollMundo) {
         for (Projectile p : projectiles) {
-            p.getRect().setTranslateX(p.getRect().getTranslateX() - scrollMundo);
+            p.moverNoMundo(scrollMundo);
         }
     }
     

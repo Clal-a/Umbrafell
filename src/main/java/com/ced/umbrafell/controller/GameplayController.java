@@ -2,6 +2,8 @@ package com.ced.umbrafell.controller;
 
 import com.ced.umbrafell.dao.PlayerDAO;
 import com.ced.umbrafell.dao.RunDAO;
+import com.ced.umbrafell.dao.TalismanDAO;
+
 
 import com.ced.umbrafell.model.InventarioItem;
 import com.ced.umbrafell.model.InventarioRun;
@@ -14,6 +16,7 @@ import com.ced.umbrafell.util.GameConfig;
 import com.ced.umbrafell.util.SceneManeger;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
@@ -32,6 +35,10 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class GameplayController {
 
     @FXML
@@ -39,6 +46,10 @@ public class GameplayController {
 
     @FXML
     private Rectangle jogador;
+    
+    private final PlayerDAO playerDAO = new PlayerDAO();
+    private final RunDAO runDAO = new RunDAO();
+    private final TalismanDAO talismanDAO = new TalismanDAO();
     
     @FXML
     private Rectangle dragao;
@@ -63,6 +74,12 @@ public class GameplayController {
 
     @FXML
     private Rectangle ponteHitbox;
+    
+    @FXML
+    private Rectangle vidaBackground;
+
+    @FXML
+    private Rectangle vidaBar;
 
     /*
     Constantes próprias da tela/câmera.
@@ -154,6 +171,7 @@ public class GameplayController {
         
         playerModel.setFaseAtual(1);
         playerModel.setVidaAtual(playerModel.getVidaMaxima());
+        atualizarBarraDeVida();
     }
     
     private void reiniciarEstadoDaRun() {
@@ -173,11 +191,16 @@ public class GameplayController {
         moedas.clear();
         
         inventarioRun = new InventarioRun();
-        adicionarItensDeTesteNoInventario();
     }
     
     public void setPlayerModel(Player playerModel) {
         this.playerModel = playerModel;
+
+        if (playerModel != null) {
+            playerModel.setVidaAtual(playerModel.getVidaMaxima());
+        }
+
+        atualizarBarraDeVida();
     }
 //</editor-fold>
 
@@ -298,6 +321,7 @@ public class GameplayController {
         
         verificarProgressoFase();
         updateMoedas(delta);
+        atualizarBarraDeVida();
     }
     
     private boolean processarInputs() {
@@ -432,21 +456,18 @@ public class GameplayController {
         }
         
         if (sacerdote != null) {
-            sacerdote.setVisible(true);
-            sacerdote.setTranslateX(1200 + (faseAtual * 180));
-            sacerdote.setTranslateY(chao - sacerdote.getHeight());
-            
-            if (enemy4 != null && enemy4.getEnemyModel() != null) {
-                enemy4.getEnemyModel().restaurarVida();
-                
-                if (enemy4 != null) {
+                sacerdote.setVisible(true);
+                sacerdote.setTranslateX(1200 + (faseAtual * 180));
+                sacerdote.setTranslateY(chao - sacerdote.getHeight());
+
+                if (enemy4 != null && enemy4.getEnemyModel() != null) {
+                    enemy4.getEnemyModel().restaurarVida();
                     enemy4.redefinirPontoPatrulha();
                 }
             }
-        }
         
         if (quimera != null) {
-            if (faseAtual >= 2) { // só aparece na segunda fase em diante
+            if (faseAtual >= 4) {
                 quimera.setVisible(true);
                 quimera.setTranslateX(1200 + (faseAtual * 160));
                 quimera.setTranslateY(chao - quimera.getHeight());
@@ -459,7 +480,7 @@ public class GameplayController {
                     }
                 }
             } else {
-                quimera.setVisible(false); // oculta na fase 1
+                quimera.setVisible(false);
             }
         }
     }
@@ -563,12 +584,12 @@ public class GameplayController {
             return 200;
         }
         
-        if ("Sacerdote".equals(inimigo)) {
-            return 400;
-        }
-        
         if ("Dragão".equals(inimigo)) {
             return 300;
+        }
+        
+        if ("Sacerdote".equals(inimigo)) {
+            return 400;
         }
         
         if ("Quimera".equals(inimigo)) {
@@ -678,11 +699,12 @@ public class GameplayController {
         int danoFinal = Math.max(0, danoBase - defesa);
         
         if (danoFinal <= 0) {
-            System.out.println(origem + " tentou causar dano, mas o dano final foi 0.");
+            System.out.println(origem + "dano final 0.");
             return;
         }
         
         playerModel.setVidaAtual(playerModel.getVidaAtual() - danoFinal);
+        atualizarBarraDeVida();
         
         if (playerModel.getVidaAtual() < 0) {
             playerModel.setVidaAtual(0);
@@ -723,6 +745,40 @@ public class GameplayController {
 
         finalizarRun("DERROTA");
     }
+    
+    private void atualizarBarraDeVida() {
+        if (playerModel == null || vidaBar == null || vidaBackground == null) {
+            return;
+        }
+
+        if (playerModel.getVidaMaxima() <= 0) {
+            vidaBar.setWidth(0);
+            return;
+        }
+
+        double proporcao = (double) playerModel.getVidaAtual() / playerModel.getVidaMaxima();
+
+        if (proporcao < 0) {
+            proporcao = 0;
+        }
+
+        if (proporcao > 1) {
+            proporcao = 1;
+        }
+
+        double larguraMax = vidaBackground.getWidth();
+
+        vidaBar.setWidth(larguraMax * proporcao);
+
+        if (proporcao > 0.6) {
+            vidaBar.setFill(Color.GREEN);
+        } else if (proporcao > 0.3) {
+            vidaBar.setFill(Color.ORANGE);
+        } else {
+            vidaBar.setFill(Color.RED);
+        }
+    }
+
 //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="INVENTÁRIO">
@@ -788,8 +844,8 @@ public class GameplayController {
                     playerModel.getVidaAtual(),
                     playerModel.getVidaMaxima(),
                     playerModel.getJoiasSombrias(),
-                    playerModel.getFaseAtual(),
-                    new ArrayList<>(inventarioRun.getItens())
+                    faseAtual,
+                    inventarioRun.getItens()
             );
             
             Stage inventarioStage = new Stage();
@@ -810,7 +866,7 @@ public class GameplayController {
     private void updateMoedas(double delta) {
         double chao = ponteHitbox != null ? ponteHitbox.getY() : 900;
         
-        for (Moeda moeda : moedas) {
+         for (Moeda moeda : moedas) {
             moeda.update(delta, jogador, playerModel, chao);
         }
     }

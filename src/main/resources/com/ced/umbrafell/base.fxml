@@ -90,7 +90,7 @@
                     </ScrollPane>
                 </Tab>
 
-                <Tab text="Talismãs">
+                <Tab text="Loja de Talismãs">
                     <ScrollPane fitToWidth="true"
                                 fitToHeight="true"
                                 styleClass="scroll-base">

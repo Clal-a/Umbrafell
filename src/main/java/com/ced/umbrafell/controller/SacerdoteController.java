@@ -11,6 +11,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class SacerdoteController {
     private Enemy enemyModel;
     
@@ -52,6 +56,7 @@ public class SacerdoteController {
         this.sacerdoteHitbox = sacerdote;
         
         this.enemyModel = new SacerdoteEnemy();
+        this.speed = enemyModel.getVelocidade();
         
         // Carrega as folhas de sprites correspondentes ao Sacerdote
         walkSheet = new Image(getClass().getResource("/com/ced/umbrafell/sacerdote(Walking).png").toExternalForm());

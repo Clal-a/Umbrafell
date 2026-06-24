@@ -6,10 +6,15 @@ package com.ced.umbrafell.controller;
 
 import com.ced.umbrafell.model.Enemy;
 import com.ced.umbrafell.model.MorcegoEnemy;
+
 import javafx.scene.image.Image;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class MorcegoController {
     private Enemy enemyModel;
     
@@ -36,6 +41,7 @@ public class MorcegoController {
         this.morcego = morcego;
         
         this.enemyModel = new MorcegoEnemy();
+        this.speed = enemyModel.getVelocidade();
         
         upImg = new Image(getClass()
                 .getResource("/com/ced/umbrafell/enemy2.png")

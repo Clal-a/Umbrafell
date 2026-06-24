@@ -1,5 +1,9 @@
 package com.ced.umbrafell.model;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class TesteInventarioRun {
 
     public static void main(String[] args) {

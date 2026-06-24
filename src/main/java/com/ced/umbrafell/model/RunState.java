@@ -1,5 +1,6 @@
 package com.ced.umbrafell.model;
 
+
 import com.ced.umbrafell.util.GameConfig;
 
 /**

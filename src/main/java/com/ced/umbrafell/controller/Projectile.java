@@ -90,4 +90,13 @@ public class Projectile {
         hitbox.setVisible(visible);
         projectileImg.setVisible(visible);
     }
+    
+    public void moverNoMundo(double scrollMundo) {
+        if (hitbox == null) {
+            return;
+        }
+
+        hitbox.setTranslateX(hitbox.getTranslateX() - scrollMundo);
+        sincronizarVisualComHitbox();
+    }
 }

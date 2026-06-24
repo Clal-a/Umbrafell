@@ -13,7 +13,7 @@ import javafx.scene.shape.Rectangle;
 
 /**
  *
- * @author aluno
+ * @author Cesar e Danilo
  */
 public class PlayerController {
 

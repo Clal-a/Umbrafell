@@ -11,6 +11,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class VampiroController {
     private Enemy enemyModel;
     
@@ -52,6 +56,7 @@ public class VampiroController {
         this.vampiroHitbox = vampiro;
         
         this.enemyModel = new VampiroEnemy();
+        this.speed = enemyModel.getVelocidade();
         
         // Carrega ambas as folhas de sprites
         walkSheet = new Image(getClass().getResource("/com/ced/umbrafell/vampire(Walking).png").toExternalForm());

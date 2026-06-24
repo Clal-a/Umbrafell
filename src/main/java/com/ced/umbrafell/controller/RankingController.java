@@ -2,15 +2,31 @@ package com.ced.umbrafell.controller;
 
 import com.ced.umbrafell.dao.RankingDAO;
 import com.ced.umbrafell.model.RankingEntry;
+
 import com.ced.umbrafell.util.SceneManeger;
+import com.ced.umbrafell.util.AlertUtil;
+
 import java.util.List;
+
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+
 import javafx.fxml.FXML;
+
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
+import java.io.File;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import javafx.stage.FileChooser;
+
+/**
+ *
+ * @author Cesar e Danilo
+ */
 public class RankingController {
 
     @FXML
@@ -105,5 +121,50 @@ public class RankingController {
     @FXML
     private void onVoltar() {
         SceneManeger.abrirMenu();
+    }
+
+    @FXML
+    private void onExportarTxt() {
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Exportar ranking");
+            fileChooser.getExtensionFilters().add(
+                    new FileChooser.ExtensionFilter("Arquivo TXT", "*.txt")
+            );
+            fileChooser.setInitialFileName("ranking_umbrafell.txt");
+
+            File arquivo = fileChooser.showSaveDialog(tabelaRanking.getScene().getWindow());
+
+            if (arquivo == null) {
+                return;
+            }
+
+            List<RankingEntry> ranking = rankingDAO.listarTodos();
+
+            try (PrintWriter writer = new PrintWriter(
+                    Files.newBufferedWriter(arquivo.toPath(), StandardCharsets.UTF_8)
+            )) {
+                writer.println("RANKING - UMBRAFELL");
+                writer.println();
+
+                for (RankingEntry entry : ranking) {
+                    writer.println(
+                            entry.getPosicao() + "º - "
+                            + entry.getJogador()
+                            + " | Pontuação: " + entry.getPontuacao()
+                            + " | Fase: " + entry.getFaseAlcancada()
+                            + " | Joias: " + entry.getJoiasSombriasObtidas()
+                            + " | Inimigos: " + entry.getInimigosDerrotados()
+                            + " | Resultado: " + entry.getResultado()
+                    );
+                }
+            }
+
+            AlertUtil.info("Ranking exportado", "O ranking foi exportado com sucesso.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            AlertUtil.erro("Erro ao exportar", "Não foi possível exportar o ranking.");
+        }
     }
 }
