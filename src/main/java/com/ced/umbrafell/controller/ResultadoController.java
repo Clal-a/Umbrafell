@@ -33,33 +33,36 @@ public class ResultadoController {
     private Button btnContinuar;
 
     public void setDados(
-            int fase,
+            int faseAtual,
             int pontuacao,
             int joias,
-            int inimigosDerrotados,
+            int inimigos,
             double distanciaPercorrida,
             double distanciaTotal,
-            boolean ultimaFase
+            boolean faseFinal
     ) {
-        if (ultimaFase) {
-            lblTitulo.setText("Run concluída!");
-            btnContinuar.setText("Finalizar");
+        if (faseFinal) {
+            lblTitulo.setText("Último caminho alcançado");
         } else {
-            lblTitulo.setText("Fase concluída!");
-            btnContinuar.setText("Próxima fase");
+            lblTitulo.setText("Fase " + faseAtual + " concluída");
         }
 
-        lblFase.setText("Fase: " + fase);
-        lblPontuacao.setText("Pontuação: " + pontuacao);
-        lblJoias.setText("Joias obtidas: " + joias);
-        lblInimigos.setText("Inimigos derrotados: " + inimigosDerrotados);
+        lblFase.setText("Fase alcançada: " + faseAtual);
+        lblPontuacao.setText("Pontuação da run: " + pontuacao);
+        lblJoias.setText("Joias sombrias obtidas: " + joias);
+        lblInimigos.setText("Inimigos derrotados: " + inimigos);
 
-        lblDistancia.setText(
-                "Distância percorrida: "
-                + (int) distanciaPercorrida
-                + " / "
-                + (int) distanciaTotal
-        );
+        double progresso = 0;
+
+        if (distanciaTotal > 0) {
+            progresso = (distanciaPercorrida / distanciaTotal) * 100.0;
+        }
+
+        if (progresso > 100) {
+            progresso = 100;
+        }
+
+        lblDistancia.setText(String.format("Progresso da fase: %.0f%%", progresso));
     }
 
     @FXML

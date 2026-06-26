@@ -245,6 +245,10 @@ public class SacerdoteController {
         pontoInicialX = sacerdoteHitbox.getTranslateX();
     }
     
+    public void piscarDano() {
+        DanoVisualUtil.aplicarFlashDano(sacerdoteImg);
+    }
+    
     public Rectangle getSacerdote() {
         return sacerdoteHitbox;
     }

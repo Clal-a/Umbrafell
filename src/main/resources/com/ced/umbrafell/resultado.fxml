@@ -3,48 +3,98 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.ced.umbrafell.controller.ResultadoController"
-      alignment="CENTER"
-      spacing="14"
-      prefWidth="420"
-      prefHeight="320"
-      style="-fx-background-color: #151018;">
+<StackPane xmlns="http://javafx.com/javafx"
+           xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.ced.umbrafell.controller.ResultadoController"
+           prefWidth="620"
+           prefHeight="420"
+           style="-fx-background-color: transparent;">
 
-    <padding>
-        <Insets top="24" right="24" bottom="24" left="24"/>
-    </padding>
+    <VBox alignment="CENTER"
+          spacing="16"
+          maxWidth="520"
+          maxHeight="340"
+          style="
+              -fx-background-color: rgba(12, 8, 16, 0.96);
+              -fx-border-color: #d9a441;
+              -fx-border-width: 2;
+              -fx-background-radius: 18;
+              -fx-border-radius: 18;
+              -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.75), 28, 0.45, 0, 8);
+          ">
 
-    <Label fx:id="lblTitulo"
-           text="Fase concluída!"
-           style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #f2e6c9;"/>
+        <padding>
+            <Insets top="28" right="36" bottom="28" left="36"/>
+        </padding>
 
-    <Label fx:id="lblFase"
-           text="Fase:"
-           style="-fx-font-size: 16px; -fx-text-fill: white;"/>
+        <Label fx:id="lblTitulo"
+               text="Fase concluída"
+               wrapText="true"
+               textAlignment="CENTER"
+               style="
+                   -fx-font-size: 30px;
+                   -fx-font-weight: bold;
+                   -fx-text-fill: #d9a441;
+               "/>
 
-    <Label fx:id="lblPontuacao"
-           text="Pontuação:"
-           style="-fx-font-size: 16px; -fx-text-fill: white;"/>
+        <Label text="A jornada de Aldric continua..."
+               wrapText="true"
+               textAlignment="CENTER"
+               style="
+                   -fx-font-size: 15px;
+                   -fx-text-fill: #c9b27a;
+                   -fx-font-style: italic;
+               "/>
 
-    <Label fx:id="lblJoias"
-           text="Joias:"
-           style="-fx-font-size: 16px; -fx-text-fill: white;"/>
+        <VBox alignment="CENTER_LEFT"
+              spacing="9"
+              maxWidth="380"
+              style="
+                  -fx-background-color: rgba(40, 24, 34, 0.75);
+                  -fx-background-radius: 12;
+                  -fx-border-color: rgba(217, 164, 65, 0.45);
+                  -fx-border-width: 1;
+                  -fx-border-radius: 12;
+                  -fx-padding: 18;
+              ">
 
-    <Label fx:id="lblInimigos"
-           text="Inimigos:"
-           style="-fx-font-size: 16px; -fx-text-fill: white;"/>
+            <Label fx:id="lblFase"
+                   text="Fase:"
+                   style="-fx-font-size: 16px; -fx-text-fill: #f2e6c9;"/>
 
-    <Label fx:id="lblDistancia"
-           text="Distância:"
-           style="-fx-font-size: 16px; -fx-text-fill: white;"/>
+            <Label fx:id="lblPontuacao"
+                   text="Pontuação:"
+                   style="-fx-font-size: 16px; -fx-text-fill: #f2e6c9;"/>
 
-    <Button fx:id="btnContinuar"
-            text="Continuar"
-            onAction="#onContinuar"
-            prefWidth="180"
-            style="-fx-font-size: 14px; -fx-font-weight: bold;"/>
-</VBox>
+            <Label fx:id="lblJoias"
+                   text="Joias:"
+                   style="-fx-font-size: 16px; -fx-text-fill: #f2d28b;"/>
+
+            <Label fx:id="lblInimigos"
+                   text="Inimigos:"
+                   style="-fx-font-size: 16px; -fx-text-fill: #f2e6c9;"/>
+
+            <Label fx:id="lblDistancia"
+                   text="Progresso:"
+                   style="-fx-font-size: 16px; -fx-text-fill: #f2e6c9;"/>
+        </VBox>
+
+        <Button fx:id="btnContinuar"
+                text="Continuar"
+                onAction="#onContinuar"
+                prefWidth="220"
+                prefHeight="44"
+                style="
+                    -fx-background-color: #d9a441;
+                    -fx-text-fill: #160d13;
+                    -fx-font-size: 15px;
+                    -fx-font-weight: bold;
+                    -fx-background-radius: 10;
+                    -fx-cursor: hand;
+                "/>
+
+    </VBox>
+</StackPane>
