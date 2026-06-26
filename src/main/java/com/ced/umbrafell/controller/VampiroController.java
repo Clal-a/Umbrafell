@@ -247,6 +247,10 @@ public class VampiroController {
         attackAnimationTime = frameDesejado * ATTACK_FRAME_DURATION;
     }
     
+    public void piscarDano() {
+        DanoVisualUtil.aplicarFlashDano(vampiroImg);
+    }
+    
     public Rectangle getVampiro() {
         return vampiroHitbox;
     }

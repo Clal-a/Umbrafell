@@ -12,6 +12,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.effect.DropShadow;
 
 /**
  *
@@ -25,7 +26,10 @@ public class QuimeraController {
     // Propriedade para controlar o visual grande de forma independente
     private ImageView quimeraImg;
     
-    private Image img;
+    private Image upImg;
+    private Image downImg;
+    private Image leftImg;
+    private Image rightImg;
     
     private double shootCooldown = 4;
     private double shootTimer = 0;
@@ -34,11 +38,17 @@ public class QuimeraController {
     private double speed = 100; // Velocidade normal de patrulha
     
     // Defina aqui o tamanho da imagem da Quimera sem afetar a hitbox!
-    private final double LARGURA_VISUAL = 250; 
-    private final double ALTURA_VISUAL = 250;
+    private double larguraVisual = 250;
+    private double alturaVisual = 250;
 
     // --- MÁQUINA DE ESTADOS DA QUIMERA ---
-    private enum Estado { PATRULHANDO, ATIRANDO_FOGO, AVANCO_VIOLENTO, RECUPERANDO }
+    private enum Estado {
+        PATRULHANDO,
+        ATIRANDO_FOGO,
+        PREPARANDO_AVANCO,
+        AVANCO_VIOLENTO,
+        RECUPERANDO
+    }
     private Estado estadoAtual = Estado.PATRULHANDO;
 
     private double alvoX = 0;
@@ -46,6 +56,23 @@ public class QuimeraController {
     private double pontoInicialX;
     private double raioPatrulha = 250; // O quão longe ela anda no chão antes de voltar
     private int direcaoPatrulha = 1;   // 1 = Direita, -1 = Esquerda
+    
+    private boolean modoBossFinal = false;
+
+    private double limiteEsquerdoArena = 760;
+    private double limiteDireitoArena = 1080;
+    private double chaoArena = 670;
+    private double alturaTiroBoss = 555;
+
+    private double tempoPreparandoAvanco = 0;
+    private double duracaoPreparacaoAvanco = 0.95;
+    private double velocidadeAvancoBoss = 330;
+
+    private int tirosDisparadosNoCiclo = 0;
+    private int tirosPorCiclo = 2;
+    
+    private final DropShadow efeitoPreparandoAvanco = new DropShadow();
+    private final DropShadow efeitoAvancando = new DropShadow();
     // -------------------------------------
     
     public QuimeraController(Rectangle quimera) {
@@ -54,7 +81,10 @@ public class QuimeraController {
         this.enemyModel = new QuimeraEnemy();
         
         // Carrega a imagem do Boss
-        img = new Image(getClass().getResource("/com/ced/umbrafell/BOSS.png").toExternalForm());
+        upImg = new Image(getClass().getResource("/com/ced/umbrafell/BOSSf.png").toExternalForm());
+        downImg = new Image(getClass().getResource("/com/ced/umbrafell/BOSSf.png").toExternalForm());
+        leftImg = new Image(getClass().getResource("/com/ced/umbrafell/BOSS.png").toExternalForm());
+        rightImg = new Image(getClass().getResource("/com/ced/umbrafell/BOSSr.png").toExternalForm());
         
         // 1. Configura a HITBOX (Retângulo do FXML)
         quimeraHitbox.setHeight(180); // Tamanho real de colisão da quimera (ajuste como quiser)
@@ -63,10 +93,11 @@ public class QuimeraController {
         // quimeraHitbox.setStroke(Color.RED); // Descomente para testar e enxergar a caixa de colisão!
 
         // 2. Cria o componente VISUAL separado (ImageView)
-        quimeraImg = new ImageView(img);
-        quimeraImg.setFitWidth(LARGURA_VISUAL);
-        quimeraImg.setFitHeight(ALTURA_VISUAL);
+        quimeraImg = new ImageView(upImg);
+        quimeraImg.setFitWidth(larguraVisual);
+        quimeraImg.setFitHeight(alturaVisual);
 
+        configurarEfeitosVisuais();
         // 3. Adiciona a imagem ao mapa se o painel pai existir
         if (quimeraHitbox.getParent() instanceof Pane) {
             Pane rootPane = (Pane) quimeraHitbox.getParent();
@@ -81,28 +112,89 @@ public class QuimeraController {
     
     // Método essencial para manter a imagem centralizada na hitbox
     public void sincronizarVisualComHitbox() {
-        quimeraImg.setTranslateX(quimeraHitbox.getTranslateX() + (quimeraHitbox.getWidth() / 2) - (LARGURA_VISUAL / 2));
-        quimeraImg.setTranslateY(quimeraHitbox.getTranslateY() + (quimeraHitbox.getHeight() / 2) - (ALTURA_VISUAL / 2));
-        
-        // Se a hitbox sumir (inimigo morto), a imagem some junta
+        quimeraImg.setTranslateX(
+                quimeraHitbox.getTranslateX()
+                + (quimeraHitbox.getWidth() / 2)
+                - (larguraVisual / 2)
+        );
+
+        quimeraImg.setTranslateY(
+                quimeraHitbox.getTranslateY()
+                + (quimeraHitbox.getHeight() / 2)
+                - (alturaVisual / 2)
+        );
+
         quimeraImg.setVisible(quimeraHitbox.isVisible());
     }
     
+    public void configurarComoBossFinal(double alturaJogador,double chaoY,double limiteEsquerdo,double limiteDireito) {
+        modoBossFinal = true;
+
+        chaoArena = chaoY;
+        limiteEsquerdoArena = limiteEsquerdo;
+        limiteDireitoArena = limiteDireito;
+
+        double alturaHitbox = alturaJogador * 1.5;
+
+        quimeraHitbox.setHeight(alturaHitbox);
+        quimeraHitbox.setWidth(170);
+
+        alturaVisual = alturaHitbox * 1.45;
+        larguraVisual = alturaVisual * 1.05;
+
+        quimeraImg.setFitHeight(alturaVisual);
+        quimeraImg.setFitWidth(larguraVisual);
+
+        speed = 80;
+        raioPatrulha = 140;
+
+        shootCooldown = 1.4;
+        shootTimer = 0.8;
+
+        alturaTiroBoss = chaoY - (alturaJogador * 0.75);
+
+        tirosDisparadosNoCiclo = 0;
+        tirosPorCiclo = 2;
+
+        tempoPreparandoAvanco = 0;
+        estadoAtual = Estado.ATIRANDO_FOGO;
+        direcaoPatrulha = -1;
+        
+        orientarPorDirecaoHorizontal(direcaoPatrulha);
+
+        redefinirPontoPatrulha();
+        limitarQuimeraNaArena();
+        sincronizarVisualComHitbox();
+    }
+    
     public void shoot(Rectangle player) {
-        double dx = player.getTranslateX() - quimeraHitbox.getTranslateX();
+        double centroQuimeraX = quimeraHitbox.getTranslateX() + (quimeraHitbox.getWidth() / 2);
+        double centroPlayerX = player.getTranslateX() + (player.getWidth() / 2);
+
+        double dx = centroPlayerX - centroQuimeraX;
 
         Pane rootPane = null;
+
         if (quimeraHitbox.getParent() instanceof Pane) {
             rootPane = (Pane) quimeraHitbox.getParent();
         }
 
-        // Criando o projétil a partir do centro da hitbox do boss
+        double startX = centroQuimeraX;
+        double startY;
+
+        if (modoBossFinal) {
+            startY = alturaTiroBoss;
+        } else {
+            startY = quimeraHitbox.getTranslateY() + (quimeraHitbox.getHeight() / 2);
+        }
+
         Projectile p = new Projectile(
-            quimeraHitbox.getTranslateX(), 
-            quimeraHitbox.getTranslateY() + (quimeraHitbox.getHeight() / 2), 
-            dx, 
-            rootPane
+                startX,
+                startY,
+                dx,
+                rootPane
         );
+
         projectiles.add(p);
     }
     
@@ -118,61 +210,350 @@ public class QuimeraController {
             return;
         }
 
+        if (modoBossFinal) {
+            atualizarBossFinal(delta, player);
+            sincronizarVisualComHitbox();
+            return;
+        }
+
         double dx = player.getTranslateX() - quimeraHitbox.getTranslateX();
         double dy = player.getTranslateY() - quimeraHitbox.getTranslateY();
         double distancia = Math.sqrt(dx * dx + dy * dy);
 
-        // --- MÁQUINA DE ESTADOS (Movimentando estritamente a Hitbox) ---
         switch (estadoAtual) {
             case PATRULHANDO:
-                quimeraHitbox.setTranslateX(quimeraHitbox.getTranslateX() + (speed * direcaoPatrulha * delta));
-                if (quimeraHitbox.getTranslateX() > pontoInicialX + raioPatrulha) direcaoPatrulha = -1;
-                else if (quimeraHitbox.getTranslateX() < pontoInicialX - raioPatrulha) direcaoPatrulha = 1;
+                orientarPorDirecaoHorizontal(direcaoPatrulha);
+                
+                quimeraHitbox.setTranslateX(
+                        quimeraHitbox.getTranslateX() + (speed * direcaoPatrulha * delta)
+                );
+
+                if (quimeraHitbox.getTranslateX() > pontoInicialX + raioPatrulha) {
+                    direcaoPatrulha = -1;
+                } else if (quimeraHitbox.getTranslateX() < pontoInicialX - raioPatrulha) {
+                    direcaoPatrulha = 1;
+                }
 
                 if (distancia < 600) {
                     estadoAtual = Estado.ATIRANDO_FOGO;
                 }
+
                 break;
 
             case ATIRANDO_FOGO:
+                orientarParaPlayer(player);
+                
                 shootTimer -= delta;
+
                 if (shootTimer <= 0) {
                     shoot(player);
                     shootTimer = shootCooldown;
                 }
+
                 if (distancia < 250) {
+                    tempoPreparandoAvanco = 0;
                     alvoX = player.getTranslateX();
-                    estadoAtual = Estado.AVANCO_VIOLENTO;
+                    estadoAtual = Estado.PREPARANDO_AVANCO;
                 }
+
                 if (distancia > 500) {
                     estadoAtual = Estado.PATRULHANDO;
                 }
+
+                break;
+
+            case PREPARANDO_AVANCO:
+                orientarParaPlayer(player);
+                
+                tempoPreparandoAvanco += delta;
+                quimeraImg.setOpacity(0.55);
+
+                if (tempoPreparandoAvanco >= duracaoPreparacaoAvanco) {
+                    quimeraImg.setOpacity(1.0);
+                    alvoX = player.getTranslateX();
+                    estadoAtual = Estado.AVANCO_VIOLENTO;
+                }
+
                 break;
 
             case AVANCO_VIOLENTO:
                 double dxAvanco = alvoX - quimeraHitbox.getTranslateX();
                 double direcaoAvanco = Math.signum(dxAvanco);
+                
+                orientarPorDirecaoHorizontal(direcaoAvanco);
+
                 if (Math.abs(dxAvanco) > 15) {
-                    quimeraHitbox.setTranslateX(quimeraHitbox.getTranslateX() + (direcaoAvanco * speed * 3.5 * delta));
+                    quimeraHitbox.setTranslateX(
+                            quimeraHitbox.getTranslateX() + (direcaoAvanco * speed * 3.5 * delta)
+                    );
                 } else {
                     tempoEspera = 1.5;
                     estadoAtual = Estado.RECUPERANDO;
                 }
+
                 break;
 
             case RECUPERANDO:
                 tempoEspera -= delta;
+
                 if (tempoEspera <= 0) {
                     pontoInicialX = quimeraHitbox.getTranslateX();
                     estadoAtual = Estado.PATRULHANDO;
                 }
+
                 break;
         }
 
-        // SEMPRE sincroniza o visual à hitbox no fim do update
         sincronizarVisualComHitbox();
     }
     
+    private void atualizarBossFinal(double delta, Rectangle player) {
+        double centroPlayerX = player.getTranslateX() + (player.getWidth() / 2);
+        double centroQuimeraX = quimeraHitbox.getTranslateX() + (quimeraHitbox.getWidth() / 2);
+
+        switch (estadoAtual) {
+            case PATRULHANDO:
+                orientarPorDirecaoHorizontal(direcaoPatrulha);
+                
+                visualNormal();
+                quimeraHitbox.setTranslateX(
+                        quimeraHitbox.getTranslateX() + (speed * direcaoPatrulha * delta)
+                );
+
+                limitarQuimeraNaArena();
+
+                if (quimeraHitbox.getTranslateX() <= limiteEsquerdoArena) {
+                    direcaoPatrulha = 1;
+                } else if (quimeraHitbox.getTranslateX() + quimeraHitbox.getWidth() >= limiteDireitoArena) {
+                    direcaoPatrulha = -1;
+                }
+
+                shootTimer -= delta;
+
+                if (shootTimer <= 0) {
+                    estadoAtual = Estado.ATIRANDO_FOGO;
+                    shootTimer = 0.4;
+                }
+
+                break;
+
+            case ATIRANDO_FOGO:
+                orientarParaPlayer(player);
+                
+                visualNormal();
+                shootTimer -= delta;
+
+                if (shootTimer <= 0) {
+                    shoot(player);
+                    tirosDisparadosNoCiclo++;
+                    shootTimer = shootCooldown;
+                }
+
+                boolean tirosConcluidos = tirosDisparadosNoCiclo >= tirosPorCiclo;
+                boolean playerMuitoPerto = Math.abs(centroPlayerX - centroQuimeraX) < 330;
+
+                if (tirosConcluidos || playerMuitoPerto) {
+                    tirosDisparadosNoCiclo = 0;
+                    tempoPreparandoAvanco = 0;
+                    alvoX = centroPlayerX - (quimeraHitbox.getWidth() / 2);
+                    estadoAtual = Estado.PREPARANDO_AVANCO;
+                }
+
+                break;
+
+            case PREPARANDO_AVANCO:
+                orientarParaPlayer(player);
+                
+                tempoPreparandoAvanco += delta;
+
+                visualPreparandoAvanco();
+
+                if (tempoPreparandoAvanco >= duracaoPreparacaoAvanco) {
+                    quimeraImg.setOpacity(1.0);
+
+                    alvoX = limitar(
+                            alvoX,
+                            limiteEsquerdoArena,
+                            limiteDireitoArena - quimeraHitbox.getWidth()
+                    );
+
+                    estadoAtual = Estado.AVANCO_VIOLENTO;
+                }
+
+                break;
+
+            case AVANCO_VIOLENTO:
+                visualAvancando();
+                
+                double dxAvanco = alvoX - quimeraHitbox.getTranslateX();
+                double direcaoAvanco = Math.signum(dxAvanco);
+                
+                orientarPorDirecaoHorizontal(direcaoAvanco);
+
+                if (Math.abs(dxAvanco) > 10) {
+                    quimeraHitbox.setTranslateX(
+                            quimeraHitbox.getTranslateX()
+                            + (direcaoAvanco * velocidadeAvancoBoss * delta)
+                    );
+
+                    limitarQuimeraNaArena();
+                } else {
+                    tempoEspera = 1.2;
+                    estadoAtual = Estado.RECUPERANDO;
+                }
+
+                break;
+
+            case RECUPERANDO:
+                orientarParaPlayer(player);
+                
+                tempoEspera -= delta;
+                visualRecuperando();
+
+                if (tempoEspera <= 0) {
+                    visualNormal();
+                    
+                    quimeraImg.setOpacity(1.0);
+                    shootTimer = 0.8;
+                    tirosDisparadosNoCiclo = 0;
+                    estadoAtual = Estado.ATIRANDO_FOGO;
+                }
+
+                break;
+        }
+    }
+
+    private void limitarQuimeraNaArena() {
+        if (!modoBossFinal) {
+            return;
+        }
+
+        if (quimeraHitbox.getTranslateX() < limiteEsquerdoArena) {
+            quimeraHitbox.setTranslateX(limiteEsquerdoArena);
+        }
+
+        double maxX = limiteDireitoArena - quimeraHitbox.getWidth();
+
+        if (quimeraHitbox.getTranslateX() > maxX) {
+            quimeraHitbox.setTranslateX(maxX);
+        }
+    }
+
+    private double limitar(double valor, double minimo, double maximo) {
+        if (valor < minimo) {
+            return minimo;
+        }
+
+        if (valor > maximo) {
+            return maximo;
+        }
+
+        return valor;
+    }
+    
+    private void configurarEfeitosVisuais() {
+        efeitoPreparandoAvanco.setColor(Color.web("#ff3333"));
+        efeitoPreparandoAvanco.setSpread(0.55);
+        efeitoPreparandoAvanco.setRadius(24);
+
+        efeitoAvancando.setColor(Color.web("#ff8c00"));
+        efeitoAvancando.setSpread(0.45);
+        efeitoAvancando.setRadius(18);
+    }
+
+    private void visualNormal() {
+        if (DanoVisualUtil.estaComFlashAtivo(quimeraImg)) {
+            return;
+        }
+
+        quimeraImg.setOpacity(1.0);
+        quimeraImg.setEffect(null);
+        quimeraImg.setScaleX(1.0);
+        quimeraImg.setScaleY(1.0);
+    }
+
+    private void visualPreparandoAvanco() {
+        if (DanoVisualUtil.estaComFlashAtivo(quimeraImg)) {
+            return;
+        }
+
+        double pulso = Math.abs(Math.sin(tempoPreparandoAvanco * 8));
+
+        efeitoPreparandoAvanco.setRadius(18 + (pulso * 18));
+
+        quimeraImg.setOpacity(1.0);
+        quimeraImg.setEffect(efeitoPreparandoAvanco);
+        quimeraImg.setScaleX(1.0 + (pulso * 0.035));
+        quimeraImg.setScaleY(1.0 + (pulso * 0.035));
+    }
+
+    private void visualAvancando() {
+        if (DanoVisualUtil.estaComFlashAtivo(quimeraImg)) {
+            return;
+        }
+
+        quimeraImg.setOpacity(1.0);
+        quimeraImg.setEffect(efeitoAvancando);
+        quimeraImg.setScaleX(1.04);
+        quimeraImg.setScaleY(1.04);
+    }
+
+    private void visualRecuperando() {
+        if (DanoVisualUtil.estaComFlashAtivo(quimeraImg)) {
+            return;
+        }
+
+        quimeraImg.setOpacity(0.85);
+        quimeraImg.setEffect(null);
+        quimeraImg.setScaleX(1.0);
+        quimeraImg.setScaleY(1.0);
+    }
+    
+    public void piscarDano() {
+        DanoVisualUtil.aplicarFlashDano(quimeraImg);
+    }
+    
+    private void orientarParaPlayer(Rectangle player) {
+        if (player == null || quimeraImg == null) {
+            return;
+        }
+
+        double playerX = player.getTranslateX();
+        double playerY = player.getTranslateY();
+
+        double quimeraX = quimeraHitbox.getTranslateX();
+        double quimeraY = quimeraHitbox.getTranslateY();
+
+        double dx = playerX - quimeraX;
+        double dy = playerY - quimeraY;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            if (dx > 0) {
+                quimeraImg.setImage(rightImg);
+            } else {
+                quimeraImg.setImage(leftImg);
+            }
+        } else {
+            if (dy > 0) {
+                quimeraImg.setImage(downImg);
+            } else {
+                quimeraImg.setImage(upImg);
+            }
+        }
+    }
+
+    private void orientarPorDirecaoHorizontal(double direcao) {
+        if (quimeraImg == null) {
+            return;
+        }
+
+        if (direcao > 0) {
+            quimeraImg.setImage(rightImg);
+        } else if (direcao < 0) {
+            quimeraImg.setImage(leftImg);
+        }
+    }
+
     public List<Projectile> getProjectiles() {
         return Collections.unmodifiableList(projectiles);
     }

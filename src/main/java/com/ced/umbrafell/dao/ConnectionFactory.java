@@ -12,7 +12,7 @@ public class ConnectionFactory {
 
     private static final String URL = "jdbc:postgresql://localhost:5432/umbrafell";
     private static final String USUARIO = "postgres";
-    private static final String SENHA = "postgresql";
+    private static final String SENHA = "postgres";
 
     private ConnectionFactory() {
         // Impede que a classe seja instanciada

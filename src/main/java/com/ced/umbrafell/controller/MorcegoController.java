@@ -140,6 +140,10 @@ public class MorcegoController {
         }
     }
     
+    public void piscarDano() {
+        DanoVisualUtil.aplicarFlashDano(morcego);
+    }
+    
     //<editor-fold defaultstate="collapsed" desc="getters e setters">
     public Rectangle getMorcego() {
         return morcego;

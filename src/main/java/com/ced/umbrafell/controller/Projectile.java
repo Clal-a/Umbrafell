@@ -45,9 +45,16 @@ public class Projectile {
         projectileImg.setFitHeight(alturaVisual);
         
         // Direção normalizada
-        double length = Math.sqrt(dx*dx);
+        double length = Math.abs(dx);
+
+        // Evita divisão por zero quando o projétil nasce quase alinhado ao jogador
+        if (length < 0.0001) {
+            dx = -1;
+            length = 1;
+        }
+
         this.dx = dx / length;
-        
+
         if (this.dx > 0) {
             projectileImg.setImage(projectiler);
         } else {

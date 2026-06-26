@@ -168,6 +168,10 @@ public class DragaoController {
         sincronizarVisualComHitbox();
     }
     
+    public void piscarDano() {
+        DanoVisualUtil.aplicarFlashDano(dragaoImg);
+    }
+    
     public List<Projectile> getProjectiles() {
         return Collections.unmodifiableList(projectiles);
     }
