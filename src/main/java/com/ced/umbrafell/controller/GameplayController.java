@@ -1663,7 +1663,7 @@ public class GameplayController {
 
         Label l1 = criarLinhaTutorial("A / D ou ← / →   Mover");
         Label l2 = criarLinhaTutorial("W / ↑   Pular");
-        Label l3 = criarLinhaTutorial("Espaço / C   Atacar");
+        Label l3 = criarLinhaTutorial("Espaço   Atacar");
         Label l4 = criarLinhaTutorial("B   Abrir inventário");
 
         Label l5 = criarLinhaTutorial(
