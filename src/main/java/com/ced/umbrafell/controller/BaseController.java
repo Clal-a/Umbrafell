@@ -7,10 +7,16 @@ import com.ced.umbrafell.dao.UpgradeDAO;
 import com.ced.umbrafell.model.Player;
 import com.ced.umbrafell.model.Talisman;
 import com.ced.umbrafell.model.Upgrade;
+import com.ced.umbrafell.model.InventarioItem;
+
+
 
 import com.ced.umbrafell.util.AlertUtil;
 
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 
@@ -80,13 +86,10 @@ public class BaseController {
     private static final int PRECO_POCAO_FORCA = 35;
     private static final int BONUS_DANO_FORCA = 3;
 
-    private int defesaTemporariaComprada = 0; 
-    
-    private int danoTemporarioComprado = 0;
-
     private final PlayerDAO playerDAO = new PlayerDAO();
     private final UpgradeDAO upgradeDAO = new UpgradeDAO();
     private final TalismanDAO talismanDAO = new TalismanDAO();
+    private final List<InventarioItem> itensCompradosNaBase = new ArrayList<>();
 
     public void setDados(Player player, int proximaFase) {
         this.player = player;
@@ -125,10 +128,11 @@ public class BaseController {
         lblStatus.setText("");
     }
 
+    //<editor-fold defaultstate="collapsed" desc="Upgrades">
     private void carregarCardsUpgrades() {
         try {
             flowUpgrades.getChildren().clear();
-
+            
             List<Upgrade> upgrades = upgradeDAO.listarTodos();
             
             for (Upgrade upgrade : upgrades) {
@@ -140,7 +144,7 @@ public class BaseController {
                 VBox card = criarCardUpgrade(upgrade);
                 flowUpgrades.getChildren().add(card);
             }
-
+            
         } catch (Exception e) {
             e.printStackTrace();
             lblMensagem.setText("Erro ao carregar upgrades.");
@@ -151,63 +155,63 @@ public class BaseController {
         if (upgrade == null) {
             return true;
         }
-
+        
         String nome = upgrade.getNome() != null ? upgrade.getNome().toLowerCase() : "";
         String atributo = upgrade.getAtributo() != null ? upgrade.getAtributo().toUpperCase() : "";
-
+        
         return nome.contains("disparo sombrio")
                 || atributo.contains("ATAQUE_SECUNDARIO");
     }
-
+    
     private VBox criarCardUpgrade(Upgrade upgrade) {
         VBox card = new VBox(8);
         card.setPrefWidth(220);
         card.setMinHeight(190);
         card.getStyleClass().add("card-upgrade");
-
+        
         Label lblNome = new Label(upgrade.getNome());
         lblNome.setWrapText(true);
         lblNome.setStyle("-fx-text-fill: #f2d28b; -fx-font-weight: bold; -fx-font-size: 15px;");
-
+        
         Label lblAtributo = new Label(upgrade.getAtributo());
         lblAtributo.setStyle("-fx-text-fill: #d9a441; -fx-font-size: 13px;");
-
+        
         int nivelAtual = upgradeDAO.buscarNivelDoJogador(player.getId(), upgrade.getId());
         int custo = upgradeDAO.calcularCustoProximoNivel(player.getId(), upgrade.getId());
-
+        
         Label lblNivel = new Label("Nível atual: " + nivelAtual + " / " + upgrade.getNivelMaximo());
         lblNivel.setStyle("-fx-text-fill: #f2e6c9; -fx-font-size: 12px;");
-
+        
         Label lblCusto = new Label(custo > 0 ? "Custo: " + custo + " joias" : "Nível máximo");
         lblCusto.setStyle("-fx-text-fill: #f2d28b; -fx-font-weight: bold; -fx-font-size: 12px;");
-
+        
         Label lblDescricao = new Label(upgrade.getDescricao());
         lblDescricao.setWrapText(true);
         lblDescricao.setStyle("-fx-text-fill: #c9b9d0; -fx-font-size: 12px;");
-
+        
         Button btnComprar = new Button("Melhorar");
         btnComprar.getStyleClass().add("botao-destaque");
         btnComprar.setMaxWidth(Double.MAX_VALUE);
         btnComprar.setVisible(false);
         btnComprar.setManaged(false);
-
+        
         btnComprar.setOnAction(event -> {
             upgradeSelecionado = upgrade;
             onComprarUpgrade();
         });
-
+        
         card.setOnMouseClicked(event -> {
             upgradeSelecionado = upgrade;
-
+            
             selecionarCard(flowUpgrades, card);
             esconderBotoesDosCards(flowUpgrades);
-
+            
             btnComprar.setVisible(true);
             btnComprar.setManaged(true);
-
+            
             lblMensagem.setText("Upgrade selecionado: " + upgrade.getNome());
         });
-
+        
         card.getChildren().addAll(
                 lblNome,
                 lblAtributo,
@@ -216,89 +220,91 @@ public class BaseController {
                 lblDescricao,
                 btnComprar
         );
-
+        
         return card;
     }
+//</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Talismans">
     private void carregarCardsTalismas() {
         try {
             flowTalismas.getChildren().clear();
-
+            
             flowTalismas.getChildren().add(criarCardPocaoVida());
             flowTalismas.getChildren().add(criarCardPocaoResistencia());
             flowTalismas.getChildren().add(criarCardPocaoForca());
-
+            
             List<Talisman> talismas = talismanDAO.listarTodos();
-
+            
             for (Talisman talisman : talismas) {
                 VBox card = criarCardTalisma(talisman);
                 flowTalismas.getChildren().add(card);
             }
-
+            
         } catch (Exception e) {
             e.printStackTrace();
             lblMensagem.setText("Erro ao carregar loja.");
         }
     }
-
+    
     private VBox criarCardTalisma(Talisman talisman) {
         final boolean possui =
                 player != null
                 && player.getId() > 0
                 && talismanDAO.jogadorPossuiTalisma(player.getId(), talisman.getIdTalisma());
-
+        
         Label lblNome = new Label(talisman.getNome());
         lblNome.getStyleClass().add("card-titulo");
         lblNome.setWrapText(true);
-
+        
         Label lblCusto = new Label(
                 possui
                         ? "Adquirido"
                         : "Custo: " + talisman.getValorEmJoiasSombrias() + " joias"
         );
         lblCusto.getStyleClass().add(possui ? "card-adquirido" : "card-custo");
-
+        
         Label lblBonus1 = new Label(
                 "+" + formatarNumero(talisman.getValorBuff1())
-                + " " + formatarAtributo(talisman.getAtributoBuff1())
+                        + " " + formatarAtributo(talisman.getAtributoBuff1())
         );
         lblBonus1.getStyleClass().add("card-texto");
-
+        
         Label lblBonus2 = new Label(
                 "+" + formatarNumero(talisman.getValorBuff2())
-                + " " + formatarAtributo(talisman.getAtributoBuff2())
+                        + " " + formatarAtributo(talisman.getAtributoBuff2())
         );
         lblBonus2.getStyleClass().add("card-texto");
-
+        
         Label lblDebuff = new Label(
                 "-" + formatarNumero(talisman.getValorDebuff())
-                + " " + formatarAtributo(talisman.getAtributoDebuff())
+                        + " " + formatarAtributo(talisman.getAtributoDebuff())
         );
         lblDebuff.getStyleClass().add("card-debuff");
-
+        
         Label lblDescricao = new Label(talisman.getDescricao());
         lblDescricao.setWrapText(true);
         lblDescricao.getStyleClass().add("card-descricao");
-
+        
         Button btnComprar = new Button(possui ? "Adquirido" : "Comprar");
         btnComprar.getStyleClass().add("botao-destaque");
         btnComprar.setMaxWidth(Double.MAX_VALUE);
         btnComprar.setVisible(false);
         btnComprar.setManaged(false);
         btnComprar.setDisable(possui);
-
+        
         btnComprar.setOnAction(event -> {
             event.consume();
-
+            
             if (possui) {
                 lblMensagem.setText("Você já possui este talismã.");
                 return;
             }
-
+            
             talismanSelecionado = talisman;
             onComprarTalisma();
         });
-
+        
         VBox card = new VBox(
                 8,
                 lblNome,
@@ -309,47 +315,159 @@ public class BaseController {
                 lblDescricao,
                 btnComprar
         );
-
+        
         card.setPrefWidth(220);
         card.setMinHeight(210);
         card.setAlignment(Pos.TOP_CENTER);
         card.getStyleClass().add("card-base");
         card.getStyleClass().add("card-talisma");
-
+        
         if (possui) {
             card.getStyleClass().add("card-bloqueado");
         }
-
+        
         card.setOnMouseClicked(event -> {
             talismanSelecionado = talisman;
-
+            
             selecionarCard(flowTalismas, card);
             esconderBotoesDosCards(flowTalismas);
-
+            
             btnComprar.setVisible(true);
             btnComprar.setManaged(true);
-
+            
             lblMensagem.setText(
                     possui
                             ? "Talismã já adquirido: " + talisman.getNome()
                             : "Talismã selecionado: " + talisman.getNome()
             );
         });
-
+        
         return card;
     }
     
+    @FXML
+    private void onComprarTalisma() {
+        if (talismanSelecionado == null) {
+            lblMensagem.setText("Selecione um talismã.");
+            return;
+        }
+
+        try {
+            boolean comprou = talismanDAO.comprarParaJogador(player.getId(), talismanSelecionado);
+
+            if (!comprou) {
+                AlertUtil.erro(
+                        "Compra não realizada",
+                        "Joias insuficientes ou talismã já adquirido."
+                );
+                lblMensagem.setText("Não foi possível comprar o talismã.");
+                return;
+            }
+
+            recarregarPlayer();
+            carregarDadosTela();
+            carregarCardsTalismas();
+            
+            adicionarItemCompradoNaBase(
+                new InventarioItem(
+                    "T",
+                    talismanSelecionado.getNome(),
+                    talismanSelecionado.getDescricao(),
+                    "Talismã",
+                    1
+                )
+            );
+
+
+            AlertUtil.info("Talismã comprado", "Talismã adquirido com sucesso.");
+
+            lblDetalheTalismaTitulo.setText("Talismã adquirido!");
+            lblDetalheTalismaTexto.setText("Você comprou: " + talismanSelecionado.getNome());
+
+            lblMensagem.setText("Talismã comprado: " + talismanSelecionado.getNome());
+
+            talismanSelecionado = null;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            lblMensagem.setText("Erro ao comprar talismã.");
+        }
+    }
+//</editor-fold>
+    
+    //<editor-fold defaultstate="collapsed" desc="Poção">
+    private VBox criarCardPocao(
+            String nome,
+            String tipo,
+            String custo,
+            String descricao,
+            String textoBotao,
+            Runnable acaoCompra
+    ) {
+        Label lblNome = new Label(nome);
+        lblNome.getStyleClass().add("card-titulo");
+        lblNome.setWrapText(true);
+        
+        Label lblTipo = new Label(tipo);
+        lblTipo.setStyle("-fx-text-fill: #d9a441; -fx-font-size: 13px;");
+        
+        Label lblCusto = new Label(custo);
+        lblCusto.getStyleClass().add("card-custo");
+        
+        Label lblDescricao = new Label(descricao);
+        lblDescricao.setWrapText(true);
+        lblDescricao.getStyleClass().add("card-descricao");
+        
+        Button btnComprar = new Button(textoBotao);
+        btnComprar.getStyleClass().add("botao-destaque");
+        btnComprar.setMaxWidth(Double.MAX_VALUE);
+        btnComprar.setVisible(false);
+        btnComprar.setManaged(false);
+        
+        VBox card = new VBox(
+                8,
+                lblNome,
+                lblTipo,
+                lblCusto,
+                lblDescricao,
+                btnComprar
+        );
+        
+        card.setPrefWidth(220);
+        card.setMinHeight(185);
+        card.setAlignment(Pos.TOP_CENTER);
+        card.getStyleClass().add("card-base");
+        card.getStyleClass().add("card-pocao");
+        
+        btnComprar.setOnAction(event -> {
+            event.consume();
+            acaoCompra.run();
+        });
+        
+        card.setOnMouseClicked(event -> {
+            selecionarCard(flowTalismas, card);
+            esconderBotoesDosCards(flowTalismas);
+            
+            btnComprar.setVisible(true);
+            btnComprar.setManaged(true);
+            
+            lblMensagem.setText(nome + " selecionada.");
+        });
+        
+        return card;
+    }
+
     private VBox criarCardPocaoVida() {
         return criarCardPocao(
                 "Poção de Vida",
                 "POÇÃO",
                 "Custo: " + PRECO_POCAO_VIDA + " joias",
-                "Recupera +" + CURA_POCAO_VIDA + " de vida imediatamente.",
-                "Beber",
+                "Recupera +" + CURA_POCAO_VIDA + " de vida durante a gameplay.",
+                "Comprar",
                 () -> comprarPocaoVida()
         );
     }
-
+    
     private VBox criarCardPocaoResistencia() {
         return criarCardPocao(
                 "Poção de Resistência",
@@ -371,76 +489,11 @@ public class BaseController {
                 () -> comprarPocaoForca()
         );
     }
-
-    private VBox criarCardPocao(
-            String nome,
-            String tipo,
-            String custo,
-            String descricao,
-            String textoBotao,
-            Runnable acaoCompra
-    ) {
-        Label lblNome = new Label(nome);
-        lblNome.getStyleClass().add("card-titulo");
-        lblNome.setWrapText(true);
-
-        Label lblTipo = new Label(tipo);
-        lblTipo.setStyle("-fx-text-fill: #d9a441; -fx-font-size: 13px;");
-
-        Label lblCusto = new Label(custo);
-        lblCusto.getStyleClass().add("card-custo");
-
-        Label lblDescricao = new Label(descricao);
-        lblDescricao.setWrapText(true);
-        lblDescricao.getStyleClass().add("card-descricao");
-
-        Button btnComprar = new Button(textoBotao);
-        btnComprar.getStyleClass().add("botao-destaque");
-        btnComprar.setMaxWidth(Double.MAX_VALUE);
-        btnComprar.setVisible(false);
-        btnComprar.setManaged(false);
-
-        VBox card = new VBox(
-                8,
-                lblNome,
-                lblTipo,
-                lblCusto,
-                lblDescricao,
-                btnComprar
-        );
-
-        card.setPrefWidth(220);
-        card.setMinHeight(185);
-        card.setAlignment(Pos.TOP_CENTER);
-        card.getStyleClass().add("card-base");
-        card.getStyleClass().add("card-pocao");
-
-        btnComprar.setOnAction(event -> {
-            event.consume();
-            acaoCompra.run();
-        });
-
-        card.setOnMouseClicked(event -> {
-            selecionarCard(flowTalismas, card);
-            esconderBotoesDosCards(flowTalismas);
-
-            btnComprar.setVisible(true);
-            btnComprar.setManaged(true);
-
-            lblMensagem.setText(nome + " selecionada.");
-        });
-
-        return card;
-    }
     
+        
     private void comprarPocaoVida() {
         if (player == null || player.getId() <= 0) {
             lblMensagem.setText("Jogador inválido.");
-            return;
-        }
-
-        if (player.getVidaAtual() >= player.getVidaMaxima()) {
-            lblMensagem.setText("Sua vida já está cheia.");
             return;
         }
 
@@ -452,30 +505,28 @@ public class BaseController {
                 return;
             }
 
-            recarregarPlayer();
-
-            int novaVida = player.getVidaAtual() + CURA_POCAO_VIDA;
-
-            if (novaVida > player.getVidaMaxima()) {
-                novaVida = player.getVidaMaxima();
-            }
-
-            player.setVidaAtual(novaVida);
-            playerDAO.atualizar(player);
+            adicionarItemCompradoNaBase(
+                    new InventarioItem(
+                            "PV",
+                            "Poção de Vida",
+                            "Recupera +" + CURA_POCAO_VIDA + " de vida durante a gameplay.",
+                            "Poção",
+                            1
+                    )
+            );
 
             recarregarPlayer();
             carregarDadosTela();
             carregarCardsTalismas();
 
-            AlertUtil.info("Poção usada", "Você recuperou vida.");
-            lblMensagem.setText("Poção de Vida usada. Vida atual: " + player.getVidaAtual() + "/" + player.getVidaMaxima());
+            lblMensagem.setText("Poção de Vida adicionada à bolsa.");
 
         } catch (Exception e) {
             e.printStackTrace();
             lblMensagem.setText("Erro ao comprar poção de vida.");
         }
     }
-
+    
     private void comprarPocaoResistencia() {
         if (player == null || player.getId() <= 0) {
             lblMensagem.setText("Jogador inválido.");
@@ -490,21 +541,21 @@ public class BaseController {
                 return;
             }
 
-            defesaTemporariaComprada += BONUS_DEFESA_RESISTENCIA;
+            adicionarItemCompradoNaBase(
+                    new InventarioItem(
+                            "PR",
+                            "Poção de Resistência",
+                            "Aumenta sua defesa em +" + BONUS_DEFESA_RESISTENCIA + " temporariamente.",
+                            "Poção",
+                            1
+                    )
+            );
 
             recarregarPlayer();
             carregarDadosTela();
             carregarCardsTalismas();
 
-            AlertUtil.info(
-                    "Poção comprada",
-                    "Defesa temporária +" + BONUS_DEFESA_RESISTENCIA + " será aplicada na próxima fase."
-            );
-
-            lblMensagem.setText(
-                    "Poção de Resistência comprada. Defesa temporária acumulada: +"
-                    + defesaTemporariaComprada
-            );
+            lblMensagem.setText("Poção de Resistência adicionada à bolsa.");
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -526,38 +577,58 @@ public class BaseController {
                 return;
             }
 
-            danoTemporarioComprado += BONUS_DANO_FORCA;
+            adicionarItemCompradoNaBase(
+                    new InventarioItem(
+                            "PF",
+                            "Poção de Força",
+                            "Aumenta seu dano em +" + BONUS_DANO_FORCA + " temporariamente.",
+                            "Poção",
+                            1
+                    )
+            );
 
             recarregarPlayer();
             carregarDadosTela();
             carregarCardsTalismas();
 
-            AlertUtil.info(
-                    "Poção comprada",
-                    "Dano temporário +" + BONUS_DANO_FORCA + " será aplicado na próxima fase."
-            );
-
-            lblMensagem.setText(
-                    "Poção de Força comprada. Dano temporário acumulado: +"
-                    + danoTemporarioComprado
-            );
+            lblMensagem.setText("Poção de Força adicionada à bolsa.");
 
         } catch (Exception e) {
             e.printStackTrace();
             lblMensagem.setText("Erro ao comprar poção de força.");
         }
     }
+//</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Cards">
     private void selecionarCard(FlowPane flowPane, VBox cardSelecionado) {
         for (javafx.scene.Node node : flowPane.getChildren()) {
             node.getStyleClass().remove("card-base-selecionado");
             node.getStyleClass().remove("card-selecionado");
         }
-
+        
         if (!cardSelecionado.getStyleClass().contains("card-selecionado")) {
             cardSelecionado.getStyleClass().add("card-selecionado");
         }
     }
+    
+    private void esconderBotoesDosCards(FlowPane flowPane) {
+        for (javafx.scene.Node node : flowPane.getChildren()) {
+            if (node instanceof VBox) {
+                VBox card = (VBox) node;
+
+                for (javafx.scene.Node filho : card.getChildren()) {
+                    if (filho instanceof Button) {
+                        Button botao = (Button) filho;
+                        botao.setVisible(false);
+                        botao.setManaged(false);
+                    }
+                }
+            }
+        }
+    }
+    
+//</editor-fold>
 
     @FXML
     private void onComprarUpgrade() {
@@ -588,44 +659,6 @@ public class BaseController {
         } catch (Exception e) {
             e.printStackTrace();
             lblMensagem.setText("Erro ao comprar upgrade.");
-        }
-    }
-
-    @FXML
-    private void onComprarTalisma() {
-        if (talismanSelecionado == null) {
-            lblMensagem.setText("Selecione um talismã.");
-            return;
-        }
-
-        try {
-            boolean comprou = talismanDAO.comprarParaJogador(player.getId(), talismanSelecionado);
-
-            if (!comprou) {
-                AlertUtil.erro(
-                        "Compra não realizada",
-                        "Joias insuficientes ou talismã já adquirido."
-                );
-                lblMensagem.setText("Não foi possível comprar o talismã.");
-                return;
-            }
-
-            recarregarPlayer();
-            carregarDadosTela();
-            carregarCardsTalismas();
-
-            AlertUtil.info("Talismã comprado", "Talismã adquirido com sucesso.");
-
-            lblDetalheTalismaTitulo.setText("Talismã adquirido!");
-            lblDetalheTalismaTexto.setText("Você comprou: " + talismanSelecionado.getNome());
-
-            lblMensagem.setText("Talismã comprado: " + talismanSelecionado.getNome());
-
-            talismanSelecionado = null;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            lblMensagem.setText("Erro ao comprar talismã.");
         }
     }
 
@@ -662,27 +695,25 @@ public class BaseController {
         return String.format("%.2f", valor);
     }
     
-    private void esconderBotoesDosCards(FlowPane flowPane) {
-        for (javafx.scene.Node node : flowPane.getChildren()) {
-            if (node instanceof VBox) {
-                VBox card = (VBox) node;
+    private void adicionarItemCompradoNaBase(InventarioItem novoItem) {
+        if (novoItem == null) {
+            return;
+        }
 
-                for (javafx.scene.Node filho : card.getChildren()) {
-                    if (filho instanceof Button) {
-                        Button botao = (Button) filho;
-                        botao.setVisible(false);
-                        botao.setManaged(false);
-                    }
-                }
+        for (InventarioItem item : itensCompradosNaBase) {
+            boolean mesmoNome = item.getNome().equals(novoItem.getNome());
+            boolean mesmoTipo = item.getTipo().equals(novoItem.getTipo());
+
+            if (mesmoNome && mesmoTipo) {
+                item.adicionarQuantidade(novoItem.getQuantidade());
+                return;
             }
         }
+
+        itensCompradosNaBase.add(novoItem);
     }
     
-    public int getDefesaTemporariaComprada() {
-        return defesaTemporariaComprada;
-    }
-    
-    public int getDanoTemporarioComprado() {
-        return danoTemporarioComprado;
+    public List<InventarioItem> getItensCompradosNaBase() {
+        return Collections.unmodifiableList(itensCompradosNaBase);
     }
 }

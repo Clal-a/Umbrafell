@@ -358,4 +358,45 @@ public class TalismanDAO {
             throw new RuntimeException("Erro ao listar inventário do jogador: " + e.getMessage(), e);
         }
     }
+    
+    public List<Talisman> listarDoJogador(int idJogador) {
+        String sql =
+                "SELECT "
+                + "t.id_talisma, "
+                + "i.id_item, "
+                + "i.nome, "
+                + "i.tipo, "
+                + "i.descricao, "
+                + "i.valor_joias_sombrias, "
+                + "t.atributo_buff_1, "
+                + "t.valor_buff_1, "
+                + "t.atributo_buff_2, "
+                + "t.valor_buff_2, "
+                + "t.atributo_debuff, "
+                + "t.valor_debuff "
+                + "FROM jogador_talismas jt "
+                + "JOIN talismas t ON t.id_talisma = jt.id_talisma "
+                + "JOIN itens i ON i.id_item = t.id_item "
+                + "WHERE jt.id_jogador = ? "
+                + "ORDER BY i.nome";
+
+        List<Talisman> talismas = new ArrayList<>();
+
+        try (Connection connection = ConnectionFactory.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
+            stmt.setInt(1, idJogador);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                talismas.add(montarTalisman(rs));
+            }
+
+            return talismas;
+
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar talismãs do jogador: " + e.getMessage(), e);
+        }
+    }
 }

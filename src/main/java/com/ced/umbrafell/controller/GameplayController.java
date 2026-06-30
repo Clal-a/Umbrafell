@@ -11,6 +11,7 @@ import com.ced.umbrafell.dao.TalismanDAO;
 import com.ced.umbrafell.model.Enemy;
 import com.ced.umbrafell.model.InventarioItem;
 import com.ced.umbrafell.model.InventarioRun;
+import com.ced.umbrafell.model.Talisman;
 import com.ced.umbrafell.model.Moeda;
 import com.ced.umbrafell.model.Player;
 import com.ced.umbrafell.model.Run;
@@ -23,6 +24,7 @@ import com.ced.umbrafell.util.SceneManeger;
 // Coleções Java - listas de moedas, boxes, encontros e falas narrativas.
 import java.util.ArrayList;
 import java.util.List;
+import java.text.Normalizer;
 
 // JavaFX Animation - loop principal e efeito de texto digitando.
 import javafx.animation.Animation;
@@ -290,6 +292,8 @@ public class GameplayController {
     private boolean jogadorDerrotado = false;
     private int defesaTemporariaAtiva = 0;
     private int danoTemporarioAtivo = 0;
+    private Talisman talismanEquipado = null;
+    private String talismanEquipadoNome = null;
 
 
     // =====================================================
@@ -372,6 +376,7 @@ public class GameplayController {
         moedas.clear();
         
         inventarioRun = new InventarioRun();
+        carregarTalismasDoJogadorNoInventario();
     }
     
     public void setPlayerModel(Player playerModel) {
@@ -1255,37 +1260,6 @@ public class GameplayController {
 //</editor-fold>
     
     //<editor-fold defaultstate="collapsed" desc="INVENTÁRIO">
-    private void adicionarItensDeTesteNoInventario() {
-        inventarioRun.adicionarItem(
-                new InventarioItem(
-                        "P",
-                        "Poção de Sangue",
-                        "Recupera parte da vida de Aldric.",
-                        "Poção",
-                        2
-                )
-        );
-        
-        inventarioRun.adicionarItem(
-                new InventarioItem(
-                        "T",
-                        "Talismã Carmesim",
-                        "+Dano, +Defesa e -Velocidade.",
-                        "Talismã",
-                        1
-                )
-        );
-        
-        inventarioRun.adicionarItem(
-                new InventarioItem(
-                        "J",
-                        "Joias Sombrias",
-                        "Moeda coletada durante a run.",
-                        "Recurso",
-                        playerModel.getJoiasSombrias()
-                )
-        );
-    }
     
     private void solicitarAbrirInventario() {
         inventarioAberto = true;
@@ -1318,7 +1292,8 @@ public class GameplayController {
                     playerModel.getVidaMaxima(),
                     playerModel.getJoiasSombrias(),
                     faseAtual,
-                    inventarioRun.getItens()
+                    inventarioRun.getItens(),
+                    talismanEquipadoNome
             );
             
             Stage inventarioStage = new Stage();
@@ -1328,8 +1303,255 @@ public class GameplayController {
             
             inventarioStage.initModality(Modality.APPLICATION_MODAL);
             inventarioStage.showAndWait();
+
+            processarAcaoInventario(
+                    inventarioController.getAcaoSelecionada(),
+                    inventarioController.getItemSelecionado()
+            );
             
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private void adicionarItensCompradosNaBase(List<InventarioItem> itensComprados) {
+        if (itensComprados == null || inventarioRun == null) {
+            return;
+        }
+
+        for (InventarioItem item : itensComprados) {
+            adicionarItemAoInventarioDaRun(item);
+        }
+    }
+
+    private void adicionarItemAoInventarioDaRun(InventarioItem item) {
+        if (item == null || inventarioRun == null) {
+            return;
+        }
+
+        if ("Talismã".equalsIgnoreCase(item.getTipo())) {
+            if (inventarioRun.buscarPorNomeETipo(item.getNome(), item.getTipo()) == null) {
+                inventarioRun.adicionarItem(
+                        new InventarioItem(
+                                item.getIcone(),
+                                item.getNome(),
+                                item.getDescricao(),
+                                item.getTipo(),
+                                1
+                        )
+                );
+            }
+
+            return;
+        }
+
+        inventarioRun.adicionarItem(item);
+    }
+    
+    private void processarAcaoInventario(String acao, InventarioItem item) {
+        if (acao == null || item == null) {
+            return;
+        }
+
+        if ("USAR".equals(acao)) {
+            usarItemInventario(item);
+            return;
+        }
+
+        if ("EQUIPAR".equals(acao)) {
+            equiparTalismaInventario(item);
+        }
+    }
+
+    private void usarItemInventario(InventarioItem item) {
+        if (item == null || playerModel == null || inventarioRun == null) {
+            return;
+        }
+
+        if (!"Poção".equalsIgnoreCase(item.getTipo())) {
+            return;
+        }
+
+        boolean usou = false;
+
+        if ("Poção de Vida".equalsIgnoreCase(item.getNome())) {
+            usou = usarPocaoVida();
+        } else if ("Poção de Resistência".equalsIgnoreCase(item.getNome())) {
+            aplicarDefesaTemporariaDaBase(3);
+            usou = true;
+        } else if ("Poção de Força".equalsIgnoreCase(item.getNome())) {
+            aplicarDanoTemporarioDaBase(3);
+            usou = true;
+        }
+
+        if (usou) {
+            inventarioRun.removerItem(item.getNome(), item.getTipo(), 1);
+            atualizarBarraDeVida();
+            aplicarAtributosDoPlayerNoControle();
+        }
+    }
+
+    private boolean usarPocaoVida() {
+        if (playerModel.getVidaAtual() >= playerModel.getVidaMaxima()) {
+            System.out.println("Vida já está cheia.");
+            return false;
+        }
+
+        int cura = 40;
+        int novaVida = playerModel.getVidaAtual() + cura;
+
+        if (novaVida > playerModel.getVidaMaxima()) {
+            novaVida = playerModel.getVidaMaxima();
+        }
+
+        playerModel.setVidaAtual(novaVida);
+
+        System.out.println("Poção de Vida usada. Vida: "
+                + playerModel.getVidaAtual()
+                + "/"
+                + playerModel.getVidaMaxima());
+
+        return true;
+    }
+    
+    private void equiparTalismaInventario(InventarioItem item) {
+        if (item == null || playerModel == null) {
+            return;
+        }
+
+        if (!"Talismã".equalsIgnoreCase(item.getTipo())) {
+            return;
+        }
+
+        if (talismanEquipadoNome != null && talismanEquipadoNome.equals(item.getNome())) {
+            System.out.println("Este talismã já está equipado.");
+            return;
+        }
+
+        Talisman novoTalisman = talismanDAO.buscarPorNome(item.getNome());
+
+        if (novoTalisman == null) {
+            System.out.println("Talismã não encontrado no banco: " + item.getNome());
+            return;
+        }
+
+        if (talismanEquipado != null) {
+            aplicarEfeitosTalisma(talismanEquipado, -1);
+        }
+
+        talismanEquipado = novoTalisman;
+        talismanEquipadoNome = novoTalisman.getNome();
+
+        aplicarEfeitosTalisma(talismanEquipado, 1);
+        aplicarAtributosDoPlayerNoControle();
+        atualizarBarraDeVida();
+
+        System.out.println("Talismã equipado: " + talismanEquipadoNome);
+    }
+    
+    private void aplicarEfeitosTalisma(Talisman talisman, int direcao) {
+        if (talisman == null || playerModel == null) {
+            return;
+        }
+
+        aplicarModificadorAtributo(
+                talisman.getAtributoBuff1(),
+                talisman.getValorBuff1() * direcao
+        );
+
+        aplicarModificadorAtributo(
+                talisman.getAtributoBuff2(),
+                talisman.getValorBuff2() * direcao
+        );
+
+        aplicarModificadorAtributo(
+                talisman.getAtributoDebuff(),
+                -talisman.getValorDebuff() * direcao
+        );
+
+        aplicarAtributosDoPlayerNoControle();
+        atualizarBarraDeVida();
+    }
+
+    private void aplicarModificadorAtributo(String atributo, double valor) {
+        if (atributo == null || playerModel == null) {
+            return;
+        }
+
+        String atributoNormalizado = normalizarAtributo(atributo);
+
+        if (atributoNormalizado.contains("VIDA")) {
+            int delta = (int) Math.round(valor);
+
+            int novaVidaMaxima = Math.max(1, playerModel.getVidaMaxima() + delta);
+            int novaVidaAtual = Math.min(novaVidaMaxima, playerModel.getVidaAtual() + delta);
+
+            playerModel.setVidaMaxima(novaVidaMaxima);
+            playerModel.setVidaAtual(Math.max(1, novaVidaAtual));
+            return;
+        }
+
+        if (atributoNormalizado.contains("DANO")) {
+            int delta = (int) Math.round(valor);
+            playerModel.setDano(Math.max(1, playerModel.getDano() + delta));
+            return;
+        }
+
+        if (atributoNormalizado.contains("DEFESA")) {
+            int delta = (int) Math.round(valor);
+            playerModel.setDefesa(Math.max(0, playerModel.getDefesa() + delta));
+            return;
+        }
+
+        if (atributoNormalizado.contains("VELOCIDADE")) {
+            playerModel.setVelocidade(Math.max(0.2, playerModel.getVelocidade() + valor));
+            return;
+        }
+
+        if (atributoNormalizado.contains("ATAQUE_PRINCIPAL")) {
+            int delta = (int) Math.round(valor);
+            playerModel.setAtaquePrincipalNivel(Math.max(1, playerModel.getAtaquePrincipalNivel() + delta));
+            return;
+        }
+
+        if (atributoNormalizado.contains("ATAQUE_SECUNDARIO")) {
+            int delta = (int) Math.round(valor);
+            playerModel.setAtaqueSecundarioNivel(Math.max(1, playerModel.getAtaqueSecundarioNivel() + delta));
+        }
+    }
+
+    private String normalizarAtributo(String texto) {
+        String normalizado = Normalizer.normalize(texto, Normalizer.Form.NFD);
+        normalizado = normalizado.replaceAll("\\p{M}", "");
+        normalizado = normalizado.toUpperCase();
+        normalizado = normalizado.replace(" ", "_");
+        return normalizado;
+    }
+    
+    private void carregarTalismasDoJogadorNoInventario() {
+        if (playerModel == null || playerModel.getId() <= 0 || inventarioRun == null) {
+            return;
+        }
+
+        try {
+            List<Talisman> talismas = talismanDAO.listarDoJogador(playerModel.getId());
+
+            for (Talisman talisman : talismas) {
+                if (inventarioRun.buscarPorNomeETipo(talisman.getNome(), "Talismã") == null) {
+                    inventarioRun.adicionarItem(
+                            new InventarioItem(
+                                    "T",
+                                    talisman.getNome(),
+                                    talisman.getDescricao(),
+                                    "Talismã",
+                                    1
+                            )
+                    );
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("Erro ao carregar talismãs do jogador no inventário:");
             e.printStackTrace();
         }
     }
@@ -1789,10 +2011,10 @@ public class GameplayController {
 
         if (enemy5 != null && jogador != null) {
             enemy5.configurarComoBossFinal(
-                    jogador.getHeight(),
-                    getChaoY(),
-                    760,
-                    1080
+                jogador.getHeight(),
+                getChaoY(),
+                300,
+                1120
             );
 
             /*
@@ -2691,17 +2913,12 @@ public class GameplayController {
             baseStage.initModality(Modality.APPLICATION_MODAL);
             baseStage.showAndWait();
 
-            int bonusDefesaTemporaria = controller.getDefesaTemporariaComprada();
-            int bonusDanoTemporario = controller.getDanoTemporarioComprado();
-
             recarregarPlayerDoBanco();
 
-            if (bonusDefesaTemporaria > 0) {
-                aplicarDefesaTemporariaDaBase(bonusDefesaTemporaria);
-            }
+            adicionarItensCompradosNaBase(controller.getItensCompradosNaBase());
 
-            if (bonusDanoTemporario > 0) {
-                aplicarDanoTemporarioDaBase(bonusDanoTemporario);
+            if (talismanEquipado != null) {
+                aplicarEfeitosTalisma(talismanEquipado, 1);
             }
 
             aplicarAtributosDoPlayerNoControle();
@@ -2740,6 +2957,12 @@ public class GameplayController {
             return;
         }
 
+        boolean tinhaTalismaEquipado = talismanEquipado != null;
+
+        if (tinhaTalismaEquipado) {
+            aplicarEfeitosTalisma(talismanEquipado, -1);
+        }
+
         removerDefesaTemporariaAtiva();
         removerDanoTemporarioAtivo();
 
@@ -2748,6 +2971,14 @@ public class GameplayController {
         } catch (Exception e) {
             System.out.println("Erro ao salvar progresso do jogador:");
             e.printStackTrace();
+        }
+
+        /*
+         * Reaplica localmente depois de salvar.
+         * Assim o banco não guarda o bônus, mas a run continua com o talismã equipado.
+         */
+        if (tinhaTalismaEquipado) {
+            aplicarEfeitosTalisma(talismanEquipado, 1);
         }
     }
     

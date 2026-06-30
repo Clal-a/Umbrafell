@@ -67,6 +67,10 @@ public class QuimeraController {
     private double tempoPreparandoAvanco = 0;
     private double duracaoPreparacaoAvanco = 0.95;
     private double velocidadeAvancoBoss = 330;
+    
+    private static final double MARGEM_ALVO_DASH_BOSS = 35;
+    private static final double TEMPO_RECUPERACAO_DASH_BOSS = 0.75;
+    private static final double VELOCIDADE_AVANCO_BOSS = 400;
 
     private int tirosDisparadosNoCiclo = 0;
     private int tirosPorCiclo = 2;
@@ -147,6 +151,7 @@ public class QuimeraController {
 
         speed = 80;
         raioPatrulha = 140;
+        velocidadeAvancoBoss = VELOCIDADE_AVANCO_BOSS;
 
         shootCooldown = 1.4;
         shootTimer = 0.8;
@@ -154,7 +159,7 @@ public class QuimeraController {
         alturaTiroBoss = chaoY - (alturaJogador * 0.75);
 
         tirosDisparadosNoCiclo = 0;
-        tirosPorCiclo = 2;
+        tirosPorCiclo = 1;
 
         tempoPreparandoAvanco = 0;
         estadoAtual = Estado.ATIRANDO_FOGO;
@@ -314,8 +319,9 @@ public class QuimeraController {
         switch (estadoAtual) {
             case PATRULHANDO:
                 orientarPorDirecaoHorizontal(direcaoPatrulha);
-                
+
                 visualNormal();
+
                 quimeraHitbox.setTranslateX(
                         quimeraHitbox.getTranslateX() + (speed * direcaoPatrulha * delta)
                 );
@@ -332,15 +338,16 @@ public class QuimeraController {
 
                 if (shootTimer <= 0) {
                     estadoAtual = Estado.ATIRANDO_FOGO;
-                    shootTimer = 0.4;
+                    shootTimer = 0.35;
                 }
 
                 break;
 
             case ATIRANDO_FOGO:
                 orientarParaPlayer(player);
-                
+
                 visualNormal();
+
                 shootTimer -= delta;
 
                 if (shootTimer <= 0) {
@@ -350,12 +357,14 @@ public class QuimeraController {
                 }
 
                 boolean tirosConcluidos = tirosDisparadosNoCiclo >= tirosPorCiclo;
-                boolean playerMuitoPerto = Math.abs(centroPlayerX - centroQuimeraX) < 330;
+                boolean playerMuitoPerto = Math.abs(centroPlayerX - centroQuimeraX) < 360;
 
                 if (tirosConcluidos || playerMuitoPerto) {
                     tirosDisparadosNoCiclo = 0;
                     tempoPreparandoAvanco = 0;
-                    alvoX = centroPlayerX - (quimeraHitbox.getWidth() / 2);
+
+                    alvoX = calcularAlvoDashBoss(centroPlayerX, centroQuimeraX);
+
                     estadoAtual = Estado.PREPARANDO_AVANCO;
                 }
 
@@ -363,19 +372,21 @@ public class QuimeraController {
 
             case PREPARANDO_AVANCO:
                 orientarParaPlayer(player);
-                
+
                 tempoPreparandoAvanco += delta;
 
                 visualPreparandoAvanco();
 
+                /*
+                 * Recalcula no fim da preparação para não mirar em uma posição velha.
+                 */
                 if (tempoPreparandoAvanco >= duracaoPreparacaoAvanco) {
                     quimeraImg.setOpacity(1.0);
 
-                    alvoX = limitar(
-                            alvoX,
-                            limiteEsquerdoArena,
-                            limiteDireitoArena - quimeraHitbox.getWidth()
-                    );
+                    centroPlayerX = player.getTranslateX() + (player.getWidth() / 2);
+                    centroQuimeraX = quimeraHitbox.getTranslateX() + (quimeraHitbox.getWidth() / 2);
+
+                    alvoX = calcularAlvoDashBoss(centroPlayerX, centroQuimeraX);
 
                     estadoAtual = Estado.AVANCO_VIOLENTO;
                 }
@@ -384,21 +395,21 @@ public class QuimeraController {
 
             case AVANCO_VIOLENTO:
                 visualAvancando();
-                
-                double dxAvanco = alvoX - quimeraHitbox.getTranslateX();
-                double direcaoAvanco = Math.signum(dxAvanco);
-                
-                orientarPorDirecaoHorizontal(direcaoAvanco);
 
-                if (Math.abs(dxAvanco) > 10) {
+                double dxAvancoBoss = alvoX - quimeraHitbox.getTranslateX();
+                double direcaoAvancoBoss = Math.signum(dxAvancoBoss);
+
+                orientarPorDirecaoHorizontal(direcaoAvancoBoss);
+
+                if (Math.abs(dxAvancoBoss) > 10) {
                     quimeraHitbox.setTranslateX(
                             quimeraHitbox.getTranslateX()
-                            + (direcaoAvanco * velocidadeAvancoBoss * delta)
+                            + (direcaoAvancoBoss * velocidadeAvancoBoss * delta)
                     );
 
                     limitarQuimeraNaArena();
                 } else {
-                    tempoEspera = 1.2;
+                    tempoEspera = TEMPO_RECUPERACAO_DASH_BOSS;
                     estadoAtual = Estado.RECUPERANDO;
                 }
 
@@ -406,16 +417,23 @@ public class QuimeraController {
 
             case RECUPERANDO:
                 orientarParaPlayer(player);
-                
+
                 tempoEspera -= delta;
+
                 visualRecuperando();
 
                 if (tempoEspera <= 0) {
                     visualNormal();
-                    
+
                     quimeraImg.setOpacity(1.0);
-                    shootTimer = 0.8;
+
+                    shootTimer = 0.45;
                     tirosDisparadosNoCiclo = 0;
+
+                    /*
+                     * Volta direto para ataque.
+                     * Assim ela não fica presa em patrulha depois do primeiro dash.
+                     */
                     estadoAtual = Estado.ATIRANDO_FOGO;
                 }
 
@@ -571,6 +589,46 @@ public class QuimeraController {
         alvoX -= scrollMundo;
 
         sincronizarVisualComHitbox();
+    }
+    
+    private double calcularAlvoDashBoss(double centroPlayerX, double centroQuimeraX) {
+        double limiteEsquerdoDash = limiteEsquerdoArena;
+        double limiteDireitoDash = limiteDireitoArena - quimeraHitbox.getWidth();
+
+        if (limiteDireitoDash < limiteEsquerdoDash) {
+            return limiteEsquerdoDash;
+        }
+
+        double xAtual = quimeraHitbox.getTranslateX();
+
+        /*
+         * Se o jogador está à esquerda, a Quimera tenta avançar para a esquerda.
+         * Se o jogador está à direita, ela tenta avançar para a direita.
+         */
+        double alvoPreferido;
+
+        if (centroPlayerX < centroQuimeraX) {
+            alvoPreferido = limiteEsquerdoDash;
+        } else {
+            alvoPreferido = limiteDireitoDash;
+        }
+
+        /*
+         * se ela já está muito perto do alvo preferido, troca para o outro lado.
+         * Isso impede o bug de "dash parado" depois do primeiro avanço.
+         */
+        boolean jaEstaNoAlvo =
+                Math.abs(xAtual - alvoPreferido) <= MARGEM_ALVO_DASH_BOSS;
+
+        if (jaEstaNoAlvo) {
+            if (alvoPreferido == limiteEsquerdoDash) {
+                return limiteDireitoDash;
+            }
+
+            return limiteEsquerdoDash;
+        }
+
+        return alvoPreferido;
     }
 
     public void redefinirPontoPatrulha() {

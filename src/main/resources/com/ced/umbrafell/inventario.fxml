@@ -4,60 +4,101 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns:fx="http://javafx.com/fxml/1"
-      xmlns="http://javafx.com/javafx/8.0.171"
+<VBox xmlns="http://javafx.com/javafx/13"
+      xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.ced.umbrafell.controller.InventarioController"
+      stylesheets="@inventario.css"
+      styleClass="inventario-root"
       spacing="12"
-      style="-fx-background-color: #1e1e1e; -fx-padding: 20;">
+      prefWidth="560"
+      prefHeight="660">
 
     <children>
 
-        <Label fx:id="lblNome"
-               style="-fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold;" />
+        <Label text="Bolsa de Aldric"
+               styleClass="inventario-titulo"/>
 
-        <Label fx:id="lblVida"
-               style="-fx-text-fill: white; -fx-font-size: 13px;" />
-
-        <Label fx:id="lblJoias"
-               style="-fx-text-fill: #d4af37; -fx-font-size: 13px;" />
-
-        <Label fx:id="lblFase"
-               style="-fx-text-fill: white; -fx-font-size: 13px;" />
-
-        <ListView fx:id="listaItens"
-                  prefHeight="260"
-                  prefWidth="420" />
-
-        <VBox fx:id="painelDetalhe"
-              visible="false"
-              managed="false"
-              spacing="4"
-              style="-fx-background-color: #2d2d2d; -fx-padding: 10;">
-
+        <VBox spacing="6">
             <children>
-                <Label fx:id="lblDetalheNome"
-                       style="-fx-text-fill: white; -fx-font-weight: bold;" />
+                <Label fx:id="lblNome"
+                       text="Jogador:"
+                       styleClass="inventario-info"/>
 
-                <Label fx:id="lblDetalheDesc"
-                       style="-fx-text-fill: #cccccc;" />
+                <Label fx:id="lblVida"
+                       text="Vida:"
+                       styleClass="inventario-info"/>
 
-                <Label fx:id="lblDetalheTipo"
-                       style="-fx-text-fill: #cccccc;" />
+                <Label fx:id="lblJoias"
+                       text="Joias Sombrias:"
+                       styleClass="inventario-joias"/>
+
+                <Label fx:id="lblFase"
+                       text="Fase atual:"
+                       styleClass="inventario-info"/>
             </children>
         </VBox>
 
-        <Label fx:id="lblTotal"
-               style="-fx-text-fill: white;" />
+        <ListView fx:id="listaItens"
+                  prefWidth="520"
+                  prefHeight="330"
+                  styleClass="lista-inventario"/>
 
-        <Button text="Fechar"
-                onAction="#onFechar" />
+        <HBox spacing="10" alignment="CENTER">
+            <children>
+                <Button fx:id="btnUsar"
+                        text="Usar poção"
+                        onAction="#onUsar"
+                        styleClass="botao-inventario"/>
+
+                <Button fx:id="btnEquipar"
+                        text="Equipar talismã"
+                        onAction="#onEquipar"
+                        styleClass="botao-inventario"/>
+            </children>
+        </HBox>
+
+        <VBox fx:id="painelDetalhe"
+              spacing="6"
+              visible="false"
+              managed="false"
+              styleClass="painel-detalhe-inventario">
+
+            <children>
+                <Label fx:id="lblDetalheNome"
+                       text="Nenhum item selecionado"
+                       wrapText="true"
+                       styleClass="detalhe-nome"/>
+
+                <Label fx:id="lblDetalheDesc"
+                       text=""
+                       wrapText="true"
+                       styleClass="detalhe-texto"/>
+
+                <Label fx:id="lblDetalheTipo"
+                       text=""
+                       wrapText="true"
+                       styleClass="detalhe-texto"/>
+            </children>
+        </VBox>
+
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <children>
+                <Label fx:id="lblTotal"
+                       text="Total: 0 item(s)"
+                       styleClass="total-inventario"/>
+
+                <Button text="Fechar"
+                        onAction="#onFechar"
+                        styleClass="botao-fechar"/>
+            </children>
+        </HBox>
 
     </children>
 
     <padding>
-        <Insets bottom="20" left="20" right="20" top="20" />
+        <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
-
 </VBox>
