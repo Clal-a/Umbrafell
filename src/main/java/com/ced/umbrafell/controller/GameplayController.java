@@ -72,6 +72,7 @@ import javafx.scene.shape.Rectangle;
 
 // JavaFX Text - alinhamento dos textos do tutorial/narrativa.
 import javafx.scene.text.TextAlignment;
+import javafx.scene.image.PixelReader;
 
 // JavaFX Stage - janelas modais de inventário, resultado e base.
 import javafx.stage.Modality;
@@ -81,6 +82,7 @@ import javafx.stage.StageStyle;
 // JavaFX Geometry - espaçamento, alinhamento e margens de painéis.
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 
 // JavaFX Time - duração da digitação da narrativa.
 import javafx.util.Duration;
@@ -175,9 +177,21 @@ public class GameplayController {
     private static final double CHAO_PADRAO = 670;
     private static final double ALTURA_HITBOX_CHAO = 2;
 
-    private static final double BOX_LARGURA = 100;
+    private static final double BOX_LARGURA = 110;
     private static final double BOX_ALTURA = 26;
+    
+    private static final double PLATAFORMA_LARGURA_VISUAL_PADRAO = 190;
+    private static final double PLATAFORMA_ALTURA_VISUAL_PADRAO = 78;
 
+    private static final double PLATAFORMA_HITBOX_LARGURA_PADRAO = 105;
+    private static final double PLATAFORMA_HITBOX_ALTURA_PADRAO = 8;
+
+    private static final double PLATAFORMA_OFFSET_Y = 24;
+
+    //para enchergar as boxes true
+    private static final boolean DEBUG_HITBOX_PLATAFORMA = false;
+    
+    private int indiceSpritePlataforma = 0;
 
     // =====================================================
     // CONSTANTES - SPAWN / DESPAWN DE INIMIGOS
@@ -253,6 +267,7 @@ public class GameplayController {
     // =====================================================
     private final List<Moeda> moedas = new ArrayList<>();
     private final List<Rectangle> boxesPulaveis = new ArrayList<>();
+    private final List<ImageView> imagensBoxesPulaveis = new ArrayList<>();
     private final List<EncontroInimigo> encontrosFase = new ArrayList<>();
     private final List<Rectangle> flashesDanoPendentes = new ArrayList<>();
 
@@ -2049,15 +2064,11 @@ public class GameplayController {
 
         double chao = getChaoY();
 
-        /*
-         * 4 boxes: duas à esquerda e duas à direita.
-         * As baixas ajudam o jogador a alcançar as altas.
-         */
-        criarBoxPulavel(280, chao - 130);
-        criarBoxPulavel(420, chao - 230);
+        criarBoxPulavel(230, chao - 135, 1);
+        criarBoxPulavel(470, chao - 230, 2);
 
-        criarBoxPulavel(820, chao - 230);
-        criarBoxPulavel(980, chao - 130);
+        criarBoxPulavel(780, chao - 230, 2);
+        criarBoxPulavel(1020, chao - 135, 1);
     }
 
     private void limitarJogadorNaArenaBoss() {
@@ -2490,45 +2501,90 @@ public class GameplayController {
     }
     
     private void organizarCamadasCenario() {
-        if (background1 != null) {
-            background1.toBack();
-        }
-        
+        /*
+         * Ordem correta:
+         * fundo
+         * plataformas
+         * inimigos
+         * jogador
+         * HUD/tutorial/narrativa
+         */
+        enviarPlataformasParaTrasDoGameplay();
+
         if (ponteHitbox != null) {
-            ponteHitbox.toFront();
+            ponteHitbox.toBack();
             ponteHitbox.setMouseTransparent(true);
         }
-        
-        for (Rectangle box : boxesPulaveis) {
-            box.toFront();
-        }
-        
+
         if (dragao != null) {
             dragao.toFront();
         }
-        
+
         if (morcego != null) {
             morcego.toFront();
         }
-        
+
+        if (vampiro != null) {
+            vampiro.toFront();
+        }
+
+        if (sacerdote != null) {
+            sacerdote.toFront();
+        }
+
+        if (quimera != null) {
+            quimera.toFront();
+        }
+
         if (jogador != null) {
             jogador.toFront();
         }
-        
+
         if (player != null && player.getPersonImg() != null) {
             player.getPersonImg().toFront();
         }
-        
+
         if (player != null && player.getWeaponRect() != null) {
             player.getWeaponRect().toFront();
         }
-        
+
+        if (vidaBackground != null) {
+            vidaBackground.toFront();
+        }
+
+        if (vidaBar != null) {
+            vidaBar.toFront();
+        }
+
         if (tutorialBox != null) {
             tutorialBox.toFront();
         }
-        
+
         if (painelNarrativa != null) {
             painelNarrativa.toFront();
+        }
+    }
+    
+    private void enviarPlataformasParaTrasDoGameplay() {
+        /*
+         * Primeiro manda plataformas e hitboxes para trás.
+         * Depois manda o background ainda mais para trás,
+         * mantendo as plataformas visíveis atrás dos personagens.
+         */
+        for (ImageView imagemBox : imagensBoxesPulaveis) {
+            if (imagemBox != null) {
+                imagemBox.toBack();
+            }
+        }
+
+        for (Rectangle box : boxesPulaveis) {
+            if (box != null) {
+                box.toBack();
+            }
+        }
+
+        if (background1 != null) {
+            background1.toBack();
         }
     }
     
@@ -2663,6 +2719,12 @@ public class GameplayController {
         for (Rectangle box : boxesPulaveis) {
             moverNoMundo(box, scrollMundo);
         }
+        
+        for (ImageView imagemBox : imagensBoxesPulaveis) {
+            if (imagemBox != null) {
+                imagemBox.setTranslateX(imagemBox.getTranslateX() - scrollMundo);
+            }
+        }
 
         for (Moeda moeda : moedas) {
             moeda.moverNoMundo(scrollMundo);
@@ -2733,42 +2795,402 @@ public class GameplayController {
         return limiteChaoAtual;
     }
     
+    private static class AjustePlataforma {
+        double larguraVisual;
+        double alturaVisual;
+
+        double larguraHitbox;
+        double alturaHitbox;
+
+        double offsetImagemY;
+        double offsetHitboxX;
+        double offsetHitboxY;
+
+        AjustePlataforma(
+                double larguraVisual,
+                double alturaVisual,
+                double larguraHitbox,
+                double alturaHitbox,
+                double offsetImagemY,
+                double offsetHitboxX,
+                double offsetHitboxY
+        ) {
+            this.larguraVisual = larguraVisual;
+            this.alturaVisual = alturaVisual;
+            this.larguraHitbox = larguraHitbox;
+            this.alturaHitbox = alturaHitbox;
+            this.offsetImagemY = offsetImagemY;
+            this.offsetHitboxX = offsetHitboxX;
+            this.offsetHitboxY = offsetHitboxY;
+        }
+    }
+    
     private void limparBoxesPulaveis() {
         if (rootPane != null) {
             rootPane.getChildren().removeAll(boxesPulaveis);
+            rootPane.getChildren().removeAll(imagensBoxesPulaveis);
         }
 
         boxesPulaveis.clear();
+        imagensBoxesPulaveis.clear();
+
+        indiceSpritePlataforma = 0;
+    }
+    
+    private Rectangle criarBoxPulavel(double mundoX, double y) {
+        return criarBoxPulavel(mundoX, y, 0);
     }
 
-    private Rectangle criarBoxPulavel(double mundoX, double y) {
-        Rectangle box = new Rectangle(BOX_LARGURA, BOX_ALTURA);
+    private Rectangle criarBoxPulavel(double mundoX, double y, int numeroPlataformaForcado) {
+        int numeroPlataforma;
 
-        box.setTranslateX(mundoX);
-        box.setTranslateY(y + 20);
-
-        box.setFill(Color.web("#2b1b33"));
-        box.setStroke(Color.web("#d6a04f"));
-        box.setStrokeWidth(2);
-
-        box.setArcWidth(8);
-        box.setArcHeight(8);
-
-        box.setMouseTransparent(true);
-        box.setManaged(false);
-
-        boxesPulaveis.add(box);
-
-        if (rootPane != null) {
-            rootPane.getChildren().add(box);
+        if (numeroPlataformaForcado >= 1 && numeroPlataformaForcado <= 4) {
+            numeroPlataforma = numeroPlataformaForcado;
+        } else {
+            numeroPlataforma = obterNumeroSpritePlataforma();
         }
 
-        return box;
+        int fase = faseAtual;
+
+        AjustePlataforma ajuste = obterAjustePlataforma(fase, numeroPlataforma);
+
+        String caminhoSprite = obterCaminhoSpritePlataforma(fase, numeroPlataforma);
+
+        double topoBase = y + 20 + PLATAFORMA_OFFSET_Y;
+
+        ImageView plataformaImg = criarImagemPlataforma(
+                caminhoSprite,
+                mundoX,
+                topoBase + ajuste.offsetImagemY,
+                ajuste.larguraVisual,
+                ajuste.alturaVisual
+        );
+
+        double xHitbox = mundoX
+                + ((ajuste.larguraVisual - ajuste.larguraHitbox) / 2.0)
+                + ajuste.offsetHitboxX;
+
+        double yHitbox = topoBase + ajuste.offsetHitboxY;
+
+        Rectangle hitbox = new Rectangle(
+                ajuste.larguraHitbox,
+                ajuste.alturaHitbox
+        );
+
+        hitbox.setTranslateX(xHitbox);
+        hitbox.setTranslateY(yHitbox);
+
+        hitbox.setMouseTransparent(true);
+        hitbox.setManaged(false);
+
+        if (DEBUG_HITBOX_PLATAFORMA) {
+            hitbox.setFill(Color.rgb(255, 0, 0, 0.35));
+            hitbox.setStroke(Color.YELLOW);
+            hitbox.setStrokeWidth(2);
+        } else {
+            hitbox.setFill(Color.TRANSPARENT);
+            hitbox.setStroke(Color.TRANSPARENT);
+        }
+
+        boxesPulaveis.add(hitbox);
+
+        if (rootPane != null) {
+            if (plataformaImg != null) {
+                rootPane.getChildren().add(plataformaImg);
+                imagensBoxesPulaveis.add(plataformaImg);
+            }
+
+            rootPane.getChildren().add(hitbox);
+        }
+
+        return hitbox;
+    }
+    
+    private ImageView criarImagemPlataforma(
+        String caminho,
+        double mundoX,
+        double yImagem,
+        double larguraVisual,
+        double alturaVisual
+    ) {
+        if (getClass().getResource(caminho) == null) {
+            System.out.println("Sprite da plataforma não encontrado: " + caminho);
+            return null;
+        }
+
+        Image img = new Image(getClass().getResource(caminho).toExternalForm());
+
+        ImageView imageView = new ImageView(img);
+        imageView.setFitWidth(larguraVisual);
+        imageView.setFitHeight(alturaVisual);
+        imageView.setPreserveRatio(false);
+        imageView.setSmooth(false);
+
+        imageView.setTranslateX(mundoX);
+        imageView.setTranslateY(yImagem);
+
+        imageView.setMouseTransparent(true);
+        imageView.setManaged(false);
+        imageView.setVisible(true);
+
+        return imageView;
+    }
+    
+    private Rectangle2D calcularViewportConteudo(Image img) {
+        if (img == null || img.getPixelReader() == null) {
+            return null;
+        }
+
+        PixelReader reader = img.getPixelReader();
+
+        int largura = (int) img.getWidth();
+        int altura = (int) img.getHeight();
+
+        int minX = largura;
+        int minY = altura;
+        int maxX = -1;
+        int maxY = -1;
+
+        for (int y = 0; y < altura; y++) {
+            for (int x = 0; x < largura; x++) {
+                Color cor = reader.getColor(x, y);
+
+                boolean temAlpha = cor.getOpacity() > 0.05;
+
+                /*
+                 * Também ignora fundo preto puro.
+                 * Isso ajuda caso a imagem esteja com fundo preto em vez de transparente.
+                 */
+                boolean naoEhPretoPuro =
+                        cor.getRed() > 0.025
+                        || cor.getGreen() > 0.025
+                        || cor.getBlue() > 0.025;
+
+                if (temAlpha && naoEhPretoPuro) {
+                    if (x < minX) minX = x;
+                    if (y < minY) minY = y;
+                    if (x > maxX) maxX = x;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+
+        if (maxX < minX || maxY < minY) {
+            return null;
+        }
+
+        int margem = 4;
+
+        minX = Math.max(0, minX - margem);
+        minY = Math.max(0, minY - margem);
+        maxX = Math.min(largura - 1, maxX + margem);
+        maxY = Math.min(altura - 1, maxY + margem);
+
+        return new Rectangle2D(
+                minX,
+                minY,
+                maxX - minX + 1,
+                maxY - minY + 1
+        );
     }
 
+    private int obterNumeroSpritePlataforma() {
+        int numeroPlataforma = (indiceSpritePlataforma % 4) + 1;
+        indiceSpritePlataforma++;
+
+        return numeroPlataforma;
+    }
+
+    private String obterCaminhoSpritePlataforma(int fase, int numeroPlataforma) {
+        if (fase < 1 || fase > 4) {
+            fase = 1;
+        }
+
+        if (numeroPlataforma < 1 || numeroPlataforma > 4) {
+            numeroPlataforma = 1;
+        }
+
+        return "/com/ced/umbrafell/plataformas/plataforma_"
+                + numeroPlataforma
+                + "_fase"
+                + fase
+                + ".png";
+    }
+    
+    private AjustePlataforma obterAjustePlataforma(int fase, int numeroPlataforma) {
+        /*
+         * Ordem dos valores:
+         *
+         * larguraVisual  = largura da imagem
+         * alturaVisual   = altura da imagem
+         * larguraHitbox  = largura pisável
+         * alturaHitbox   = altura da hitbox
+         * offsetImagemY  = move só a imagem no eixo Y
+         * offsetHitboxX  = move só a hitbox no eixo X
+         * offsetHitboxY  = move só a hitbox no eixo Y
+         *
+         * offsetImagemY:
+         * negativo sobe a imagem
+         * positivo desce a imagem
+         *
+         * offsetHitboxY:
+         * negativo sobe o piso
+         * positivo desce o piso
+         */
+
+        if (fase == 1) {
+            if (numeroPlataforma == 1) {
+                return new AjustePlataforma(160, 110, 150, 5, -40, 0, 0);
+            }
+
+            if (numeroPlataforma == 2) {
+                return new AjustePlataforma(160, 110, 150, 5, -40, 0, 0);
+            }
+
+            if (numeroPlataforma == 3) {
+                return new AjustePlataforma(160, 110, 150, 5, -40, 0, 0);
+            }
+
+            if (numeroPlataforma == 4) {
+                return new AjustePlataforma(160, 150, 140, 5, -70, 0, 0);
+            }
+        }
+
+        /*
+         * Ordem dos valores:
+         *
+         * larguraVisual  = largura da imagem
+         * alturaVisual   = altura da imagem
+         * larguraHitbox  = largura pisável
+         * alturaHitbox   = altura da hitbox
+         * offsetImagemY  = move só a imagem no eixo Y
+         * offsetHitboxX  = move só a hitbox no eixo X
+         * offsetHitboxY  = move só a hitbox no eixo Y
+         *
+         * offsetImagemY:
+         * negativo sobe a imagem
+         * positivo desce a imagem
+         *
+         * offsetHitboxY:
+         * negativo sobe o piso
+         * positivo desce o piso
+         */
+        if (fase == 2) {
+            if (numeroPlataforma == 1) {
+                return new AjustePlataforma(200, 150, 150, 8, -60, 0, 0);
+            }
+
+            if (numeroPlataforma == 2) {
+                return new AjustePlataforma(210, 250, 100, 8, -80, 20, 0);
+            }
+
+            if (numeroPlataforma == 3) {
+                return new AjustePlataforma(160, 150, 100, 8, -60, 0, 0);
+            }
+
+            if (numeroPlataforma == 4) {
+                return new AjustePlataforma(300, 250, 60, 8, -80, -15, 0);
+            }
+        }
+
+        /*
+         * Ordem dos valores:
+         *
+         * larguraVisual  = largura da imagem
+         * alturaVisual   = altura da imagem
+         * larguraHitbox  = largura pisável
+         * alturaHitbox   = altura da hitbox
+         * offsetImagemY  = move só a imagem no eixo Y
+         * offsetHitboxX  = move só a hitbox no eixo X
+         * offsetHitboxY  = move só a hitbox no eixo Y
+         *
+         * offsetImagemY:
+         * negativo sobe a imagem
+         * positivo desce a imagem
+         *
+         * offsetHitboxY:
+         * negativo sobe o piso
+         * positivo desce o piso
+         */
+        if (fase == 3) {
+            if (numeroPlataforma == 1) {
+                return new AjustePlataforma(200, 150, 150, 8, -60, 0, 0);
+            }
+
+            if (numeroPlataforma == 2) {
+                return new AjustePlataforma(200, 150, 150, 8, -60, 0, 0);
+            }
+
+            if (numeroPlataforma == 3) {
+                return new AjustePlataforma(200, 150, 150, 8, -60, 0, 0);
+            }
+
+            if (numeroPlataforma == 4) {
+                return new AjustePlataforma(200, 150, 150, 8, -60, 0, 0);
+            }
+        }
+        
+        /*
+         * Ordem dos valores:
+         *
+         * larguraVisual  = largura da imagem
+         * alturaVisual   = altura da imagem
+         * larguraHitbox  = largura pisável
+         * alturaHitbox   = altura da hitbox
+         * offsetImagemY  = move só a imagem no eixo Y
+         * offsetHitboxX  = move só a hitbox no eixo X
+         * offsetHitboxY  = move só a hitbox no eixo Y
+         *
+         * offsetImagemY:
+         * negativo sobe a imagem
+         * positivo desce a imagem
+         *
+         * offsetHitboxY:
+         * negativo sobe o piso
+         * positivo desce o piso
+         */
+        if (fase == 4) {
+            if (numeroPlataforma == 1) {
+                return new AjustePlataforma(250, 175, 140, 8, -70, 0, 0);
+            }
+
+            if (numeroPlataforma == 2) {
+                return new AjustePlataforma(250, 175, 140, 8, -70, 0, 0);
+            }
+
+            if (numeroPlataforma == 3) {
+                return new AjustePlataforma(250, 270, 150, 8, -80, 0, 0);
+            }
+
+            if (numeroPlataforma == 4) {
+                return new AjustePlataforma(200, 150, 150, 8, -60, 0, 0);
+            }
+        }
+
+        return new AjustePlataforma(
+                PLATAFORMA_LARGURA_VISUAL_PADRAO,
+                PLATAFORMA_ALTURA_VISUAL_PADRAO,
+                PLATAFORMA_HITBOX_LARGURA_PADRAO,
+                PLATAFORMA_HITBOX_ALTURA_PADRAO,
+                0,
+                0,
+                0
+        );
+    }
+    
     private void criarBoxAltaComApoio(double xAlta, double yAlta, double chao) {
-        double yBoxPadrao = chao - 150; 
-        double deslocamentoLateral = 140;
+        criarBoxAltaComApoio(xAlta, yAlta, chao, 1, 1);
+    }
+
+    private void criarBoxAltaComApoio(
+        double xAlta,
+        double yAlta,
+        double chao,
+        int spriteAlta,
+        int spriteApoio
+    ) {
+        double yBoxPadrao = chao - 150;
+        double deslocamentoLateral = 190;
 
         double xApoio = xAlta - deslocamentoLateral;
 
@@ -2776,8 +3198,12 @@ public class GameplayController {
             xApoio = xAlta + deslocamentoLateral;
         }
 
-        criarBoxPulavel(xApoio, yBoxPadrao);
-        criarBoxPulavel(xAlta, yAlta);
+        /*
+         * Primeiro cria a plataforma de apoio,
+         * depois a plataforma alta.
+         */
+        criarBoxPulavel(xApoio, yBoxPadrao, spriteApoio);
+        criarBoxPulavel(xAlta, yAlta, spriteAlta);
     }
 
     private void criarBoxesDaFase() {
@@ -2786,36 +3212,91 @@ public class GameplayController {
         double chao = getChaoY();
 
         if (faseAtual == 1) {
-            criarBoxPulavel(850, chao - 150);
+            /*
+             * Fase 1:
+             * Usa plataformas simples e uma alta no meio.
+             */
+            criarBoxPulavel(820, chao - 150, 1);
 
-            criarBoxAltaComApoio(1350, chao - 210, chao);
+            criarBoxAltaComApoio(
+                    1550,
+                    chao - 210,
+                    chao,
+                    4, // sprite da plataforma alta
+                    2  // sprite da plataforma de apoio
+            );
 
-            criarBoxPulavel(1850, chao - 150);
+            criarBoxPulavel(2250, chao - 150, 3);
 
         } else if (faseAtual == 2) {
-            criarBoxPulavel(700, chao - 150);
+            /*
+             * Fase 2:
+             * Evita usar muitas plataformas muito altas/estranhas.
+             * Usa sprite 1 e 3 como plataformas principais.
+             */
+            criarBoxPulavel(760, chao - 150, 1);
 
-            criarBoxAltaComApoio(1150, chao - 230, chao);
+            criarBoxAltaComApoio(
+                    1450,
+                    chao - 225,
+                    chao,
+                    3, // alta
+                    2  // apoio
+            );
 
-            criarBoxPulavel(1650, chao - 150);
+            criarBoxPulavel(2150, chao - 150, 1);
 
-            criarBoxAltaComApoio(2150, chao - 240, chao);
+            criarBoxAltaComApoio(
+                    2800,
+                    chao - 230,
+                    chao,
+                    1, // alta especial
+                    4  // apoio
+            );
 
         } else if (faseAtual == 3) {
-            criarBoxPulavel(900, chao - 150);
+            /*
+             * Fase 3:
+             * Todos os sprites estão com ajuste parecido,
+             * então pode variar bastante.
+             */
+            criarBoxPulavel(900, chao - 150, 1);
 
-            criarBoxAltaComApoio(1500, chao - 230, chao);
+            criarBoxAltaComApoio(
+                    1750,
+                    chao - 225,
+                    chao,
+                    2,
+                    3
+            );
 
-            criarBoxPulavel(2200, chao - 150);
+            criarBoxPulavel(2600, chao - 150, 4);
 
         } else if (faseAtual == 4) {
-            criarBoxPulavel(800, chao - 150);
+            /*
+             * Fase 4:
+             * Antes da arena da Quimera.
+             * Deixa menos poluído para não misturar com as boxes da arena.
+             */
+            criarBoxPulavel(800, chao - 145, 1);
 
-            criarBoxAltaComApoio(1350, chao - 230, chao);
+            criarBoxAltaComApoio(
+                    1550,
+                    chao - 220,
+                    chao,
+                    2,
+                    3
+            );
 
-            criarBoxPulavel(1900, chao - 150);
+            criarBoxPulavel(2350, chao - 145, 2);
+
+            /*
+             * Eu removeria a box de 2850 porque ela fica perto demais
+             * da transição para arena e pode misturar com as boxes da Quimera.
+             */
+            // criarBoxPulavel(2850, chao - 150, 1);
         }
-    }
+}
     
     private double getLarguraVisaoAtual() {
         if (rootPane != null && rootPane.getWidth() > 0) {
