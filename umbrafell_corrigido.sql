@@ -715,56 +715,55 @@ CREATE INDEX idx_jogador_talismas_jogador
 ON jogador_talismas(id_jogador);
 
 
+
 -- ============================================================
 -- DADOS DE TESTE OPCIONAIS
--- Pode apagar essa parte se quiser começar sem jogador cadastrado.
 -- ============================================================
 
-WITH jogador_teste AS (
-    INSERT INTO jogadores (
-        nome,
-        vida_maxima,
-        vida_atual,
-        dano,
-        defesa,
-        velocidade,
-        ataque_principal_nivel,
-        ataque_secundario_nivel,
-        joias_sombrias,
-        fase_atual
-    ) VALUES (
-        'Aldric',
-        100,
-        100,
-        10,
-        0,
-        1.00,
-        1,
-        1,
-        0,
-        1
-    )
-    RETURNING id_jogador
-)
-INSERT INTO runs (
-    id_jogador,
-    pontuacao,
-    fase_alcancada,
-    joias_sombrias_obtidas,
-    inimigos_derrotados,
-    resultado,
-    venceu_boss
-)
-SELECT
-    id_jogador,
-    9200,
-    5,
-    340,
-    58,
-    'VITORIA',
-    TRUE
-FROM jogador_teste;
-
+-- WITH jogador_teste AS (
+--     INSERT INTO jogadores (
+--         nome,
+--         vida_maxima,
+--         vida_atual,
+--         dano,
+--         defesa,
+--         velocidade,
+--         ataque_principal_nivel,
+--         ataque_secundario_nivel,
+--         joias_sombrias,
+--         fase_atual
+--     ) VALUES (
+--         'Aldric',
+--         100,
+--         100,
+--         10,
+--         0,
+--         1.00,
+--         1,
+--         1,
+--         0,
+--         1
+--     )
+--     RETURNING id_jogador
+-- )
+-- INSERT INTO runs (
+--     id_jogador,
+--     pontuacao,
+--     fase_alcancada,
+--     joias_sombrias_obtidas,
+--     inimigos_derrotados,
+--     resultado,
+--     venceu_boss
+-- )
+-- SELECT
+--     id_jogador,
+--     9200,
+--     5,
+--     340,
+--     58,
+--     'VITORIA',
+--     TRUE
+-- FROM jogador_teste;
 
 -- ============================================================
 -- CONSULTAS ÚTEIS
